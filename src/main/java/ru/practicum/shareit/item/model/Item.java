@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.model;
 
+import lombok.Data;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import ru.practicum.shareit.user.User;
 
@@ -9,14 +10,15 @@ import javax.validation.constraints.Size;
 /**
  * TODO Sprint add-controllers.
  */
+@Data
 public class Item {
-    long itemId;
+    private Long itemId;
     @NotBlank
-    String name;
+    private String name;
     @Size(max = 200)
-    String description;
-    boolean available;
-    User owner;
+    private String description;
+    private boolean available;
+    private User owner;
 
     public Item (String name, String description, boolean available) {
         this.name = name;
