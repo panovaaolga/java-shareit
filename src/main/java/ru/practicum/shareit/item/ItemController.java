@@ -6,6 +6,8 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
+import java.util.List;
+
 /**
  * TODO Sprint add-controllers.
  */
@@ -17,7 +19,36 @@ public class ItemController {
 
     @PostMapping
     public Item createItem(@RequestHeader("X-Sharer-User_Id") long userId,
-                           @RequestBody ItemDto item) {
-        return itemService.createItem(item, userId);
+                           @RequestBody ItemDto itemDto) {
+        return itemService.createItem(itemDto, userId);
     }
+
+    @PatchMapping
+    public Item updateItem(@RequestHeader("X-Sharer-User_Id") long userId,
+                           @PathVariable long itemId,
+                           @RequestBody ItemDto itemDto) {
+        //код
+        return null;
+    }
+
+    @GetMapping
+    public List<Item> getAllItemsOfUser(@RequestHeader("X-Sharer-User-Id") long userId) {
+        //код
+        return null;
+    }
+
+    @GetMapping
+    public ItemDto getItemById(@PathVariable long itemId) {
+        //код
+        return null;
+    }
+
+    @GetMapping("/search")
+    public List<ItemDto> getSearchedItems(@RequestParam String text) {
+        //код
+        return null;
+    }
+
+//    @DeleteMapping
+
 }
