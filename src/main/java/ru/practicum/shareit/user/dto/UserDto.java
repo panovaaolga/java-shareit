@@ -1,7 +1,12 @@
 package ru.practicum.shareit.user.dto;
 
-public class UserDto {
-    private String name;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 
+public class UserDto {
+    @NotBlank
+    private String name;
+    @Email
+    @NotBlank
     private String email;
 }
