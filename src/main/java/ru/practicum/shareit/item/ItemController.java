@@ -18,13 +18,13 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public Item createItem(@RequestHeader("X-Sharer-User_Id") long userId,
+    public ItemDto createItem(@RequestHeader("X-Sharer-User_Id") long userId,
                            @RequestBody ItemDto itemDto) {
         return itemService.createItem(itemDto, userId);
     }
 
     @PatchMapping
-    public Item updateItem(@RequestHeader("X-Sharer-User_Id") long userId,
+    public ItemDto updateItem(@RequestHeader("X-Sharer-User_Id") long userId,
                            @PathVariable long itemId,
                            @RequestBody ItemDto itemDto) {
         //код
@@ -32,13 +32,13 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<Item> getAllItemsOfUser(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public List<ItemDto> getAllItemsOfUser(@RequestHeader("X-Sharer-User-Id") long userId) {
         //код
         return null;
     }
 
     @GetMapping
-    public ItemDto getItemById(@PathVariable long itemId) {
+    public ItemDto getItemById(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long itemId) {
         //код
         return null;
     }
@@ -49,6 +49,9 @@ public class ItemController {
         return null;
     }
 
-//    @DeleteMapping
+    @DeleteMapping
+    public void deleteItem(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long itemId) {
+        //код
+    }
 
 }
