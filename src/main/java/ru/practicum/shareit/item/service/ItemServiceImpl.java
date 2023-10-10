@@ -28,23 +28,28 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto updateItem() {
+    public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
         return null;
     }
 
     @Override
-    public ItemDto getItem() {
+    public ItemDto getItem(long userId, long itemId) {
         return null;
     }
 
     @Override
-    public List<ItemDto> getAllItemsByUser() {
+    public List<ItemDto> getAllItemsByUser(long userId) {
         return null;
     }
 
     @Override
-    public void deleteItem() {
+    public void deleteItem(long userId, long itemId) {
+        itemDao.deleteItem(userId);
+    }
 
+    @Override
+    public List<ItemDto> getSearchedItems(String text) {
+        return ItemMapper.mapToItemDtoList(itemDao.getSearchedItems(text));
     }
 
     private void increaseCount() {

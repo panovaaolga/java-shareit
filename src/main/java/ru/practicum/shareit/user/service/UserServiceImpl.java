@@ -1,6 +1,5 @@
 package ru.practicum.shareit.user.service;
 
-import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserMapper;
@@ -14,8 +13,8 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
-    private final static long MIN_COUNT = 0;
-    private long count = MIN_COUNT;
+//    private final static long MIN_COUNT = 0;
+//    private long count = MIN_COUNT;
 
     public UserServiceImpl() {
         userDao = new UserDaoImpl();
@@ -25,10 +24,9 @@ public class UserServiceImpl implements UserService {
         if (userDto.getEmail() == null || userDto.getName() == null) {
             throw new RuntimeException(); //Исправить ошибку
         }
-        increaseCount();
-        userDao.save(UserMapper.mapToUser(userDto, count));
-        return userDao.getUserById(count); //код
-     //   userDao.save(UserMapper.mapToNewUser(userDto)); //если у поля id будет аннотация generatedValue
+//        increaseCount();
+        //  userDao.save(UserMapper.mapToUser(userDto, count)); старый вариант
+        return userDao.save(UserMapper.mapToUser(userDto)); //код
     }
 
     public User updateUser(UserDto userDto, long userId) {
@@ -41,9 +39,8 @@ public class UserServiceImpl implements UserService {
         } else if (userDto.getEmail() != null) {
             user.setEmail(userDto.getEmail());
         }
-        userDao.update(user);
         //userDao.update(UserMapper.mapToExistingUser(userDto, userId));
-        return userDao.getUserById(userId); //код
+        return userDao.update(user); //код
     }
 
     public UserDto getUserById(long userId) {
@@ -62,8 +59,8 @@ public class UserServiceImpl implements UserService {
         userDao.delete(userId);
     }
 
-    private void increaseCount() {
-        count++;
-    }
+//    private void increaseCount() {
+//        count++;
+//    }
     }
 
