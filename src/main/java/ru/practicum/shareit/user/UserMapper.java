@@ -12,9 +12,16 @@ public class UserMapper {
         return new UserDto(user.getName(), user.getEmail());
     }
 
-    public static User mapToUser(UserDto userDto, Long userId) {
+//    public static User mapToUser(UserDto userDto, Long userId) { старый вариант
+//        User user = new User();
+//        user.setUserId(userId);
+//        user.setName(userDto.getName());
+//        user.setEmail(userDto.getEmail());
+//        return user;
+//    }
+
+    public static User mapToUser(UserDto userDto) {
         User user = new User();
-        user.setUserId(userId);
         user.setName(userDto.getName());
         user.setEmail(userDto.getEmail());
         return user;

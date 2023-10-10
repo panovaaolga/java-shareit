@@ -27,31 +27,27 @@ public class ItemController {
     public ItemDto updateItem(@RequestHeader("X-Sharer-User_Id") long userId,
                            @PathVariable long itemId,
                            @RequestBody ItemDto itemDto) {
-        //код
-        return null;
+        return itemService.updateItem(userId, itemId, itemDto);
     }
 
     @GetMapping
     public List<ItemDto> getAllItemsOfUser(@RequestHeader("X-Sharer-User-Id") long userId) {
-        //код
-        return null;
+        return itemService.getAllItemsByUser(userId);
     }
 
     @GetMapping
     public ItemDto getItemById(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long itemId) {
-        //код
-        return null;
+        return itemService.getItem(userId, itemId);
     }
 
     @GetMapping("/search")
     public List<ItemDto> getSearchedItems(@RequestParam String text) {
-        //код
-        return null;
+        return itemService.getSearchedItems(text);
     }
 
     @DeleteMapping
     public void deleteItem(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long itemId) {
-        //код
+        itemService.deleteItem(userId, itemId);
     }
 
 }
