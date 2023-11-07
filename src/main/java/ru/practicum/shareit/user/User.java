@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Data
 public class User {
-    private Long userId;
+    private Long userId; //или сделать сущность типа long?
     @NotBlank
     private String name;
     @Email
