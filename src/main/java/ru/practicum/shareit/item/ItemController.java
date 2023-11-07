@@ -37,8 +37,8 @@ public class ItemController {
 
     @GetMapping
     public ItemDto getItemById(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long itemId) {
-        return itemService.getItem(userId, itemId);
-    }
+        return itemService.getItem(itemId);
+    } //по идее здесь не нужен хэдер, тк просматривать может любой
 
     @GetMapping("/search")
     public List<ItemDto> getSearchedItems(@RequestParam String text) {

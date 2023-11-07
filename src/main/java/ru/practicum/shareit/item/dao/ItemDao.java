@@ -9,11 +9,11 @@ import java.util.List;
 
 public interface ItemDao {
 
-    void saveItem(Item item);
+    Item saveItem(long userId, Item item);
 
-    void updateItem(Item item);
+    Item updateItem(Item item);
 
-    void deleteItem(long itemId);
+    void deleteItem(long userId, long itemId);
 
     Item getItemById(long itemId);
 
