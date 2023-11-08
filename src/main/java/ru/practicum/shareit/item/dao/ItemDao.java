@@ -11,7 +11,7 @@ public interface ItemDao {
 
     Item saveItem(long userId, Item item);
 
-    Item updateItem(Item item);
+    Item updateItem(long userId, Item item);
 
     void deleteItem(long userId, long itemId);
 

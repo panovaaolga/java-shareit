@@ -19,14 +19,14 @@ public class ItemController {
 
     @PostMapping
     public ItemDto createItem(@RequestHeader("X-Sharer-User_Id") long userId,
-                           @RequestBody ItemDto itemDto) {
+                           @RequestBody ItemDto itemDto) throws UserNotFoundException {
         return itemService.createItem(itemDto, userId);
     }
 
     @PatchMapping
     public ItemDto updateItem(@RequestHeader("X-Sharer-User_Id") long userId,
                            @PathVariable long itemId,
-                           @RequestBody ItemDto itemDto) {
+                           @RequestBody ItemDto itemDto) throws UserNotFoundException {
         return itemService.updateItem(userId, itemId, itemDto);
     }
 
@@ -35,7 +35,7 @@ public class ItemController {
         return itemService.getAllItemsByUser(userId);
     }
 
-    @GetMapping
+    @GetMapping("/{itemId}")
     public ItemDto getItemById(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long itemId) {
         return itemService.getItem(itemId);
     } //по идее здесь не нужен хэдер, тк просматривать может любой

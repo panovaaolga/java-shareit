@@ -1,6 +1,8 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import ru.practicum.shareit.item.UserNotFoundException;
 import ru.practicum.shareit.user.EmailDuplicationException;
 import ru.practicum.shareit.user.User;
@@ -13,6 +15,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 import java.util.List;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserDao userDao;
 
@@ -21,32 +24,42 @@ public class UserServiceImpl implements UserService {
     }
 
     public User createUser(UserDto userDto) throws ValidationException, EmailDuplicationException {
-        if (userDto.getEmail() == null || userDto.getName() == null) {
-            throw new ValidationException("Email or name should not be empty"); //Проверить ошибку
-        }
         return userDao.save(UserMapper.mapToUser(userDto));
     }
 
-    public User updateUser(UserDto userDto, long userId) throws UserNotFoundException {
+    public User updateUser(UserDto userDto, long userId) throws UserNotFoundException, ValidationException, EmailDuplicationException {
         try {
-            User user = userDao.getUserById(userId);
-            if (userDto.getName() != null) {
-                user.setName(userDto.getName());
-            } else if (userDto.getEmail() != null) {
-                user.setEmail(userDto.getEmail());
+            User user = new User();
+            if (userDto.getName() != null && userDto.getEmail() != null) {
+                user = UserMapper.mapToUser(userDto);
+                user.setId(userId);
+            } else {
+                user.setId(userId);
+                if (userDto.getName() != null) {
+                    user.setName(userDto.getName());
+                    user.setEmail(userDao.getUserById(userId).getEmail());
+                }
+                if (userDto.getEmail() != null) {
+                    user.setEmail(userDto.getEmail());
+                    user.setName(userDao.getUserById(userId).getName());
+                }
             }
-            return userDao.update(user); //код
-        } catch (UserNotFoundException | ValidationException | EmailDuplicationException e) {
-            throw new UserNotFoundException("User not found");
+            return userDao.update(user);
+        } catch (UserNotFoundException e) {
+            log.info(e.getMessage());
+            throw new UserNotFoundException(e.getMessage());
+        } catch (EmailDuplicationException e) {
+            log.info(e.getMessage());
+            throw new EmailDuplicationException(e.getMessage());
         }
     }
 
-    public UserDto getUserById(long userId) throws UserNotFoundException {
-        return UserMapper.mapToUserDto(userDao.getUserById(userId));
+    public User getUserById(long userId) throws UserNotFoundException {
+        return userDao.getUserById(userId);
     }
 
-    public List<UserDto> getAllUsers() {
-        return UserMapper.mapToUserDtoList(userDao.getAll());
+    public List<User> getAllUsers() {
+        return userDao.getAll();
     }
 
     public void deleteUser(long userId) {
