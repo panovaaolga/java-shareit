@@ -29,17 +29,18 @@ public class ItemDaoImpl implements ItemDao {
     }
 
     @Override
-    public Item updateItem(long userId, Item item) throws UserNotFoundException {
+    public Item updateItem(long userId, Item item)  {
         //добавить проверку, что юзер - владелец вещи
         if (items.get(userId).stream().map(Item::getItemId).collect(Collectors.toList()).contains(item.getItemId())) {
-            items.get(userId).stream().map(Item::getItemId).filter();
+//            items.get(userId).stream().map(Item::getItemId).filter();
         }
-        throw new UserNotFoundException("You are not owner of this item");
+       // throw new UserNotFoundException("You are not owner of this item");
 //        try {
 //            items.replace(item.getItemId(), items.get(item.getItemId()), item);
 //        } catch (Exception e) {    //поменять исключение
 //            throw new RuntimeException();
 //        }
+        return null;
     }
 
     @Override

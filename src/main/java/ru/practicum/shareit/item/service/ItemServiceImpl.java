@@ -27,12 +27,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) throws UserNotFoundException {
-        try {
+//        try {
 
             return null;
-        } catch (UserNotFoundException e) {
-            throw new UserNotFoundException("You do not have access to this item");
-        }
+//        } catch (UserNotFoundException e) {
+//            throw new UserNotFoundException("You do not have access to this item");
+//        }
     }
 
     @Override

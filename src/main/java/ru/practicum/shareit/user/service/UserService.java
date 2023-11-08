@@ -12,11 +12,11 @@ public interface UserService {
 
     User createUser(UserDto userDto) throws ValidationException, EmailDuplicationException;
 
-    User updateUser(UserDto userDto, long userId) throws UserNotFoundException;
+    User updateUser(UserDto userDto, long userId) throws UserNotFoundException, ValidationException, EmailDuplicationException;
 
-    UserDto getUserById(long userId) throws UserNotFoundException;
+    User getUserById(long userId) throws UserNotFoundException;
 
-    List<UserDto> getAllUsers();
+    List<User> getAllUsers();
 
     void deleteUser(long userId);
 

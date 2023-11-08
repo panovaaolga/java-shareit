@@ -13,7 +13,7 @@ public interface UserDao {
 
     User save(User user) throws ValidationException, EmailDuplicationException;
 
-    User update(User user) throws ValidationException, EmailDuplicationException;
+    User update(User user) throws ValidationException, EmailDuplicationException, UserNotFoundException;
 
     void delete(long userId);
 
