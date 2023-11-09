@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user.dto;
+package ru.practicum.shareit;
 
 import javax.validation.groups.Default;
 

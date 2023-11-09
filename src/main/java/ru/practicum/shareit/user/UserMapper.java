@@ -28,7 +28,6 @@ public class UserMapper {
                 usersDto.add(mapToUserDto(u));
             }
         }
-        log.info("usersDtoList {}", usersDto);
         return usersDto;
     }
 }

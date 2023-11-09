@@ -21,6 +21,7 @@ public class Item {
     private String name;
     @Size(min = 3, max = 600)
     private String description;
+    @NotNull
     private boolean available;
     @NotNull
     private User owner;
