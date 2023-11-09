@@ -1,18 +1,22 @@
 package ru.practicum.shareit.item.dto;
 
 import lombok.Data;
+import ru.practicum.shareit.ValidationGroups;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 
 /**
  * TODO Sprint add-controllers.
  */
 @Data
 public class ItemDto {
-    @NotBlank
+    @Null(groups = {ValidationGroups.Create.class})
+    private Long id;
+    @NotBlank(groups = {ValidationGroups.Create.class})
     private String name;
+    @NotBlank(groups = {ValidationGroups.Create.class})
     @Size(min = 3, max = 200)
     private String description;
-    private boolean available;
+    @NotNull
+    private Boolean available;
 }
