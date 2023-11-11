@@ -24,10 +24,7 @@ public class UserController {
 
     @PostMapping
     public User create(@Validated(ValidationGroups.Create.class) @RequestBody UserDto userDto) throws ValidationException, EmailDuplicationException {
-       User user = userService.createUser(userDto);
-        log.info("User created: {}", user);
-      //  return userService.createUser(userDto);
-        return user;
+        return userService.createUser(userDto);
     }
 
     @PatchMapping("/{userId}")

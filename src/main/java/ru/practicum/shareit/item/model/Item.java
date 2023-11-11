@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
@@ -22,7 +21,7 @@ public class Item {
     @Size(min = 3, max = 600)
     private String description;
     @NotNull
-    private boolean available;
+    private Boolean available;
     @NotNull
     private User owner;
     private ItemRequest request;

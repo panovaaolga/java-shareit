@@ -6,13 +6,9 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.UserNotFoundException;
 import ru.practicum.shareit.item.dao.ItemDao;
-import ru.practicum.shareit.item.dao.ItemDaoImpl;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.dao.UserDao;
-import ru.practicum.shareit.user.dao.UserDaoImpl;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
 import java.util.List;
@@ -34,12 +30,18 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) throws UserNotFoundException {
-//        try {
-        Item item = itemDao.updateItem(userId, ItemMapper.mapToExistingItem(itemDto, itemId));
-            return ItemMapper.mapToItemDto(item);
-//        } catch (UserNotFoundException e) {
-//            throw new UserNotFoundException("You do not have access to this item");
-//        }
+        Item itemBefore = ItemMapper.mapToExistingItem(itemDto, itemId);
+        log.info("itemBefore: {}", itemBefore);
+        if (itemBefore.getName() == null) {
+            itemBefore.setName(itemDao.getItemById(itemId).getName());
+        }
+        if (itemBefore.getDescription() == null) {
+            itemBefore.setDescription(itemDao.getItemById(itemId).getDescription());
+        }
+        if (itemBefore.getAvailable() == null) {
+            itemBefore.setAvailable(itemDao.getItemById(itemId).getAvailable());
+        }
+        return ItemMapper.mapToItemDto(itemDao.updateItem(userId, itemBefore));
     }
 
     @Override
