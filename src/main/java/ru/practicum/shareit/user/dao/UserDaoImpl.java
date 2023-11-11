@@ -18,8 +18,8 @@ import java.util.Map;
 @Component
 public class UserDaoImpl implements UserDao {
     private Map<Long, User> usersMap = new HashMap<>();
-    private final static long INCREASE_COUNT = 1;
-    private final static long MIN_COUNT = 0;
+    private static final long INCREASE_COUNT = 1;
+    private static final long MIN_COUNT = 0;
     private long count = MIN_COUNT;
 
     @Override
