@@ -5,7 +5,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.ValidationGroups;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.List;
@@ -39,8 +38,7 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(//@RequestHeader("X-Sharer-User-Id") long userId,
-                               @PathVariable long itemId) {
+    public ItemDto getItemById(@PathVariable long itemId) {
         return itemService.getItem(itemId);
     }
 

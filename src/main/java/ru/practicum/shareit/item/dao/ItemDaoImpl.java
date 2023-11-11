@@ -33,23 +33,17 @@ public class ItemDaoImpl implements ItemDao {
 
     @Override
     public Item updateItem(long userId, Item item) throws UserNotFoundException {
-        //добавить проверку, что юзер - владелец вещи
-        log.info("Item: {}", item);
-        if (isOwner(userId, item.getItemId())) {
-            log.info("User is an owner of the item");
-            Item itemm = items.get(userId).stream()
+        if (items.containsKey(userId) && isOwner(userId, item.getItemId())) {
+            Item updatedItem = items.get(userId).stream()
                     .filter(i -> i.getItemId().equals(item.getItemId())).findFirst().orElseThrow();
-            itemm.setName(item.getName());
-            log.info("Itemm: {}", itemm);
-            return itemm;
+            updatedItem.setName(item.getName());
+            updatedItem.setDescription(item.getDescription());
+            updatedItem.setAvailable(item.getAvailable());
+            log.info("Updated item: {}", getItemById(item.getItemId()));
+            return updatedItem;
         } else {
             throw new UserNotFoundException("You are not owner of this item");
         }
-//        try {
-//            items.replace(item.getItemId(), items.get(item.getItemId()), item);
-//        } catch (Exception e) {    //поменять исключение
-//            throw new RuntimeException();
-//        }
     }
 
     @Override
@@ -83,12 +77,7 @@ public class ItemDaoImpl implements ItemDao {
             for (Item i : items.values().stream()
                     .flatMap(List::stream)
                     .collect(Collectors.toList())) {
-//            if (i.isAvailable() && (i.getName().toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT))
-//                    || i.getDescription().toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT)))) {
-//                searchedItems.add(i);
-//            }
-
-                if (i.isAvailable() && (StringUtils.containsIgnoreCase(i.getName(), text)
+                if (i.getAvailable() && (StringUtils.containsIgnoreCase(i.getName(), text)
                         || StringUtils.containsIgnoreCase(i.getDescription(), text))) {
                     searchedItems.add(i);
                 }
@@ -103,7 +92,7 @@ public class ItemDaoImpl implements ItemDao {
     }
 
     private boolean isOwner(long userId, long itemId) {
-       return items.get(userId).stream()
+        return items.get(userId).stream()
                .map(Item::getItemId)
                .collect(Collectors.toList())
                .contains(itemId);

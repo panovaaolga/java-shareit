@@ -14,7 +14,7 @@ public class ItemMapper {
         itemDto.setId(item.getItemId());
         itemDto.setName(item.getName());
         itemDto.setDescription(item.getDescription());
-        itemDto.setAvailable(item.isAvailable());
+        itemDto.setAvailable(item.getAvailable());
         return itemDto;
     }
 

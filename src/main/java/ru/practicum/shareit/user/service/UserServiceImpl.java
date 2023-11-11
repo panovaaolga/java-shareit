@@ -2,7 +2,6 @@ package ru.practicum.shareit.user.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import ru.practicum.shareit.item.UserNotFoundException;
 import ru.practicum.shareit.user.EmailDuplicationException;
 import ru.practicum.shareit.user.User;
