@@ -72,7 +72,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     private long countId() {
-        return count + 1;
+        return ++count;
     }
 
     private boolean emailIsAvailable(String email) {
