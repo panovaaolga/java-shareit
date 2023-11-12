@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ItemDaoImpl implements ItemDao {
     private final Map<Long, List<Item>> items = new HashMap<>();
-    private static final long INCREASE_COUNT = 1;
+    private final static long INCREASE_COUNT = 1;
     private static final long MIN_COUNT = 0;
     private long count = MIN_COUNT;
 
