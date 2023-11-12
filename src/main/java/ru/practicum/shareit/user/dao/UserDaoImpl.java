@@ -18,9 +18,7 @@ import java.util.Map;
 @Component
 public class UserDaoImpl implements UserDao {
     private Map<Long, User> usersMap = new HashMap<>();
-    private static final long INCREASE_COUNT = 1;
-    private static final long MIN_COUNT = 0;
-    private long count = MIN_COUNT;
+    private long count = 0;
 
     @Override
     public User getUserById(long userId) throws UserNotFoundException {
@@ -74,14 +72,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     private long countId() {
-//        long lastId = usersMap.keySet()
-//                .stream()
-//                .mapToLong(Long::longValue)
-//                .max()
-//                .orElse(MIN_COUNT);
-//        return lastId + INCREASE_COUNT;
-        count += INCREASE_COUNT;
-        return count;
+        return count + 1;
     }
 
     private boolean emailIsAvailable(String email) {
