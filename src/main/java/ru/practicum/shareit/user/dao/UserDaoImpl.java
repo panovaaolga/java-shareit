@@ -72,6 +72,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     private long countId() {
+        
         return ++count;
     }
 
