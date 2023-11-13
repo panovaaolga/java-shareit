@@ -28,7 +28,8 @@ public class ItemController {
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") long userId,
                            @PathVariable long itemId,
-                           @RequestBody ItemDto itemDto) throws UserNotFoundException {
+                           @Validated(ValidationGroups.Update.class) @RequestBody ItemDto itemDto)
+            throws UserNotFoundException {
         return itemService.updateItem(userId, itemId, itemDto);
     }
 

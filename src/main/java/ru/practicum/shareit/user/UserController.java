@@ -28,7 +28,9 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public User update(@Validated(ValidationGroups.Update.class) @RequestBody UserDto userDto, @PathVariable long userId) throws UserNotFoundException, ValidationException, EmailDuplicationException {
+    public User update(@Validated(ValidationGroups.Update.class) @RequestBody UserDto userDto,
+                       @PathVariable long userId)
+            throws UserNotFoundException, ValidationException, EmailDuplicationException {
        User user = userService.updateUser(userDto, userId);
         log.info("User updated: {}", user);
         return user;

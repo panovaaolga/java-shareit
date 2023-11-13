@@ -26,7 +26,8 @@ public class UserServiceImpl implements UserService {
         return userDao.save(UserMapper.mapToUser(userDto));
     }
 
-    public User updateUser(UserDto userDto, long userId) throws UserNotFoundException, ValidationException, EmailDuplicationException {
+    public User updateUser(UserDto userDto, long userId)
+            throws UserNotFoundException, ValidationException, EmailDuplicationException {
         try {
             User user = new User();
             if (userDto.getName() != null && userDto.getEmail() != null) {
@@ -62,7 +63,8 @@ public class UserServiceImpl implements UserService {
     }
 
     public void deleteUser(long userId) {
+
         userDao.delete(userId);
     }
-    }
+}
 
