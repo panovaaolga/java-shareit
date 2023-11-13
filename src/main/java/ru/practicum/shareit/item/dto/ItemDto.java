@@ -15,8 +15,8 @@ public class ItemDto {
     @NotBlank(groups = {ValidationGroups.Create.class})
     private String name;
     @NotBlank(groups = {ValidationGroups.Create.class})
-    @Size(min = 3, max = 200)
+    @Size(min = 3, max = 600)
     private String description;
-    @NotNull
+    @NotNull(groups = {ValidationGroups.Create.class})
     private Boolean available;
 }
