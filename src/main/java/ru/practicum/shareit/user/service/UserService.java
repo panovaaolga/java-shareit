@@ -18,6 +18,10 @@ public interface UserService {
 
     List<User> getAllUsers();
 
+    User save(UserDto userDto);
+
+    User update(UserDto userDto, long userId) throws UserNotFoundException;
+
     void deleteUser(long userId);
 
 }

@@ -3,11 +3,16 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.item.CommentMapper;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.UserNotFoundException;
 import ru.practicum.shareit.item.dao.ItemDao;
+import ru.practicum.shareit.item.dto.CommentDtoInput;
+import ru.practicum.shareit.item.dto.CommentDtoOutput;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
@@ -19,6 +24,7 @@ import java.util.List;
 public class ItemServiceImpl implements ItemService {
     private final ItemDao itemDao;
     private final UserServiceImpl userService;
+    private final CommentRepository commentRepository;
 
     @Override
     public ItemDto createItem(ItemDto itemDto, long userId) throws UserNotFoundException {
@@ -62,5 +68,12 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getSearchedItems(String text) {
         return ItemMapper.mapToItemDtoList(itemDao.getSearchedItems(text));
+    }
+
+    @Override
+    public CommentDtoOutput addComment(CommentDtoInput commentDtoInput, long authorId) throws UserNotFoundException {
+        User author = userService.getUserById(authorId);
+        Comment comment = CommentMapper.mapToNewComment(commentDtoInput, author);
+        return CommentMapper.mapToCommentOutput(commentRepository.save(comment));
     }
 }

@@ -24,14 +24,16 @@ public class UserController {
 
     @PostMapping
     public User create(@Validated(ValidationGroups.Create.class) @RequestBody UserDto userDto) throws ValidationException, EmailDuplicationException {
-        return userService.createUser(userDto);
+        User user = userService.save(userDto);
+        log.info("User created: {}", user);
+        return user;
     }
 
     @PatchMapping("/{userId}")
     public User update(@Validated(ValidationGroups.Update.class) @RequestBody UserDto userDto,
                        @PathVariable long userId)
             throws UserNotFoundException, ValidationException, EmailDuplicationException {
-       User user = userService.updateUser(userDto, userId);
+        User user = userService.update(userDto, userId);
         log.info("User updated: {}", user);
         return user;
     }
