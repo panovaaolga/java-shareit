@@ -3,7 +3,7 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.item.UserNotFoundException;
+import ru.practicum.shareit.item.NotFoundException;
 import ru.practicum.shareit.user.EmailDuplicationException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserMapper;
@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public User updateUser(UserDto userDto, long userId)
-            throws UserNotFoundException, ValidationException, EmailDuplicationException {
+            throws NotFoundException, ValidationException, EmailDuplicationException {
         try {
             User user = new User();
             if (userDto.getName() != null && userDto.getEmail() != null) {
@@ -50,16 +50,16 @@ public class UserServiceImpl implements UserService {
                 }
             }
             return userDao.update(user);
-        } catch (UserNotFoundException e) {
+        } catch (NotFoundException e) {
             log.info(e.getMessage());
-            throw new UserNotFoundException(e.getMessage());
+            throw new NotFoundException(User.class.getName());
         } catch (EmailDuplicationException e) {
             log.info(e.getMessage());
             throw new EmailDuplicationException(e.getMessage());
         }
     }
 
-    public User update(UserDto userDto, long userId) throws UserNotFoundException {
+    public User update(UserDto userDto, long userId) throws NotFoundException {
         if (userRepository.findById(userId).isPresent()) {
             User user = userRepository.findById(userId).get();
             if (userDto.getName() != null && userDto.getEmail() != null) {
@@ -75,15 +75,15 @@ public class UserServiceImpl implements UserService {
             }
             return userRepository.save(user);
         } else {
-            throw new UserNotFoundException("User not found");
+            throw new NotFoundException(User.class.getName());
         }
     }
 
-    public User getUserById(long userId) throws UserNotFoundException {
+    public User getUserById(long userId) throws NotFoundException {
         try {
             return userRepository.findById(userId).orElseThrow();
         } catch (Exception e) {
-            throw new UserNotFoundException("User not found");
+            throw new NotFoundException(User.class.getName());
         }
     }
 

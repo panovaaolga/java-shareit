@@ -23,9 +23,10 @@ public class Booking {
     @Column(name = "end_date")
     private LocalDateTime end;
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(8) default 'WAITING' ")
     private Status status;
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "booker_id")
     private User booker;
     @ManyToOne
     @JoinColumn(name = "item_id")
