@@ -1,5 +1,7 @@
 package ru.practicum.shareit.item;
 
+import ru.practicum.shareit.booking.dto.BookingDtoOutput;
+import ru.practicum.shareit.item.dto.CommentDtoOutput;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithDates;
 import ru.practicum.shareit.item.model.Item;
@@ -57,7 +59,17 @@ public class ItemMapper {
         return item;
     }
 
-    public static List<ItemDtoWithDates> mapToItemDtoListWithDates(List<Item> items) {
-        return null;
+    public static ItemDtoWithDates mapToItemDtoWithDates(Item item, BookingDtoOutput lastBooking,
+                                                         BookingDtoOutput nextBooking,
+                                                         List<CommentDtoOutput> comments) {
+        ItemDtoWithDates itemDtoWithDates = new ItemDtoWithDates();
+        itemDtoWithDates.setId(item.getId());
+        itemDtoWithDates.setName(item.getName());
+        itemDtoWithDates.setDescription(item.getDescription());
+        itemDtoWithDates.setAvailable(item.getAvailable());
+        itemDtoWithDates.setLastBooking(lastBooking);
+        itemDtoWithDates.setNextBooking(nextBooking);
+        itemDtoWithDates.setComments(comments);
+        return itemDtoWithDates;
     }
 }

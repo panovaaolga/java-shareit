@@ -8,6 +8,7 @@ import ru.practicum.shareit.ValidationGroups;
 import ru.practicum.shareit.item.dto.CommentDtoInput;
 import ru.practicum.shareit.item.dto.CommentDtoOutput;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoWithDates;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.InsufficientPermissionException;
 import ru.practicum.shareit.user.ValidationException;
@@ -28,7 +29,6 @@ public class ItemController {
     public ItemDto createItem(@RequestHeader("X-Sharer-User-Id") long userId,
                            @Validated(ValidationGroups.Create.class) @RequestBody ItemDto itemDto)
             throws NotFoundException {
-      //  return itemService.createItem(itemDto, userId);
         ItemDto itemDtoNew = itemService.save(itemDto, userId);
         log.info("Item created: {}", itemDtoNew);
         return itemDtoNew;
@@ -43,13 +43,14 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getAllItemsOfUser(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public List<ItemDtoWithDates> getAllItemsOfUser(@RequestHeader("X-Sharer-User-Id") long userId) {
         return itemService.getAllItemsByUser(userId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable long itemId) throws NotFoundException {
-        return itemService.getItem(itemId);
+    public ItemDtoWithDates getItemById(@RequestHeader("X-Sharer-User-Id") long userId,
+                                        @PathVariable long itemId) throws NotFoundException {
+        return itemService.getItem(itemId, userId);
     }
 
     @GetMapping("/search")
@@ -65,8 +66,10 @@ public class ItemController {
 
     @PostMapping("{itemId}/comment")
     public CommentDtoOutput addComment(@RequestHeader("X-Sharer-User-Id") long authorId,
-                                       @Validated @RequestBody CommentDtoInput commentDtoInput) throws NotFoundException {
-        return itemService.addComment(commentDtoInput, authorId);
+                                       @PathVariable long itemId,
+                                       @Validated @RequestBody CommentDtoInput commentDtoInput)
+            throws NotFoundException, ValidationException {
+        return itemService.addComment(commentDtoInput, authorId, itemId);
     }
 
 }

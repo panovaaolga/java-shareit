@@ -13,7 +13,6 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 @Service
 @Slf4j

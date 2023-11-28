@@ -8,5 +8,4 @@ import javax.validation.constraints.NotBlank;
 public class CommentDtoInput {
     @NotBlank
     private String text;
-
 }

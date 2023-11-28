@@ -2,13 +2,9 @@ package ru.practicum.shareit.item.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 /**
  * TODO Sprint add-controllers.
@@ -31,5 +27,4 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "owner_id")
     private User owner;
-    //private ItemRequest request;
 }
