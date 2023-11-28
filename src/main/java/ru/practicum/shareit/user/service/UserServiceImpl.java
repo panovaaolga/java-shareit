@@ -30,6 +30,26 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    public User update(UserDto userDto, long userId) throws NotFoundException {
+        if (userRepository.findById(userId).isPresent()) {
+            User user = userRepository.findById(userId).get();
+            if (userDto.getName() != null && userDto.getEmail() != null) {
+                user.setName(userDto.getName());
+                user.setEmail(userDto.getEmail());
+            } else {
+                if (userDto.getName() != null) {
+                    user.setName(userDto.getName());
+                }
+                if (userDto.getEmail() != null) {
+                    user.setEmail(userDto.getEmail());
+                }
+            }
+            return userRepository.save(user);
+        } else {
+            throw new NotFoundException(User.class.getName());
+        }
+    }
+
     public User updateUser(UserDto userDto, long userId)
             throws NotFoundException, ValidationException, EmailDuplicationException {
         try {
@@ -55,26 +75,6 @@ public class UserServiceImpl implements UserService {
         } catch (EmailDuplicationException e) {
             log.info(e.getMessage());
             throw new EmailDuplicationException(e.getMessage());
-        }
-    }
-    
-    public User update(UserDto userDto, long userId) throws NotFoundException {
-        if (userRepository.findById(userId).isPresent()) {
-            User user = userRepository.findById(userId).get();
-            if (userDto.getName() != null && userDto.getEmail() != null) {
-                user.setName(userDto.getName());
-                user.setEmail(userDto.getEmail());
-            } else {
-                if (userDto.getName() != null) {
-                    user.setName(userDto.getName());
-                }
-                if (userDto.getEmail() != null) {
-                    user.setEmail(userDto.getEmail());
-                }
-            }
-            return userRepository.save(user);
-        } else {
-            throw new NotFoundException(User.class.getName());
         }
     }
 
