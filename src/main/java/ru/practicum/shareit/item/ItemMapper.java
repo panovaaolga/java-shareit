@@ -48,7 +48,7 @@ public class ItemMapper {
         item.setAvailable(itemDto.getAvailable());
         return item;
     }
-
+  
     public static Item mapToItem(ItemDto itemDto, long itemId, User user) {
         Item item = new Item();
         item.setId(itemId);
