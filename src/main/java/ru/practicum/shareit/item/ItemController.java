@@ -44,12 +44,6 @@ public class ItemController {
 
     @GetMapping
     public List<ItemDtoWithDates> getAllItemsOfUser(@RequestHeader("X-Sharer-User-Id") long userId) {
-            throws UserNotFoundException {
-        return itemService.updateItem(userId, itemId, itemDto);
-    }
-
-    @GetMapping
-    public List<ItemDto> getAllItemsOfUser(@RequestHeader("X-Sharer-User-Id") long userId) {
         return itemService.getAllItemsByUser(userId);
     }
 
