@@ -57,6 +57,7 @@ public class UserServiceImpl implements UserService {
             throw new EmailDuplicationException(e.getMessage());
         }
     }
+    
     public User update(UserDto userDto, long userId) throws NotFoundException {
         if (userRepository.findById(userId).isPresent()) {
             User user = userRepository.findById(userId).get();

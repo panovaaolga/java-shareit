@@ -102,7 +102,7 @@ public class ItemServiceImpl implements ItemService {
                 lastBooking = BookingMapper.mapToBookingDtoOutput(bookingRepository
                         .findLastBooking(itemId, LocalDateTime.now()).get(0));
             }
-            if(!bookingRepository.findNextBooking(itemId, LocalDateTime.now()).isEmpty()) {
+            if (!bookingRepository.findNextBooking(itemId, LocalDateTime.now()).isEmpty()) {
                 nextBooking = BookingMapper.mapToBookingDtoOutput(bookingRepository
                         .findNextBooking(itemId, LocalDateTime.now()).get(0));
             }
@@ -122,7 +122,7 @@ public class ItemServiceImpl implements ItemService {
                 lastBooking = BookingMapper.mapToBookingDtoOutput(bookingRepository
                         .findLastBooking(i.getId(), LocalDateTime.now()).get(0));
             }
-            if(!bookingRepository.findNextBooking(i.getId(), LocalDateTime.now()).isEmpty()) {
+            if (!bookingRepository.findNextBooking(i.getId(), LocalDateTime.now()).isEmpty()) {
                 nextBooking = BookingMapper.mapToBookingDtoOutput(bookingRepository
                         .findNextBooking(i.getId(), LocalDateTime.now()).get(0));
             }

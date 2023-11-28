@@ -76,7 +76,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<Booking> getAllByBooker(long userId, String state) throws UnsupportedStateException, NotFoundException {
         userService.getUserById(userId);
-            switch(state.toUpperCase(Locale.ROOT)) {
+            switch (state.toUpperCase(Locale.ROOT)) {
                 case "WAITING":
                     return bookingRepository.findAllByBookerIdAndStatus(userId, Status.WAITING);
                 case "REJECTED":

@@ -22,8 +22,8 @@ public class CommentMapper {
 
     public static List<CommentDtoOutput> mapToListDto(List<Comment> comments) {
         List<CommentDtoOutput> commentList = new ArrayList<>();
-        if(!comments.isEmpty()) {
-            for(Comment c : comments) {
+        if (!comments.isEmpty()) {
+            for (Comment c : comments) {
                 commentList.add(mapToCommentOutput(c));
             }
         }
