@@ -55,7 +55,6 @@ public class ItemController {
 
     @GetMapping("/search")
     public List<ItemDto> getSearchedItems(@RequestParam String text) {
-
         return itemService.getSearchedItems(text);
     }
 
