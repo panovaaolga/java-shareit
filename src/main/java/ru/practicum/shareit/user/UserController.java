@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.UserNotFoundException;
+import ru.practicum.shareit.item.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.ValidationGroups;
 import ru.practicum.shareit.user.service.UserService;
@@ -23,21 +23,24 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public User create(@Validated(ValidationGroups.Create.class) @RequestBody UserDto userDto) throws ValidationException, EmailDuplicationException {
-        return userService.createUser(userDto);
+    public User create(@Validated(ValidationGroups.Create.class) @RequestBody UserDto userDto)
+            throws ValidationException, EmailDuplicationException {
+        User user = userService.save(userDto);
+        log.info("User created: {}", user);
+        return user;
     }
 
     @PatchMapping("/{userId}")
     public User update(@Validated(ValidationGroups.Update.class) @RequestBody UserDto userDto,
                        @PathVariable long userId)
-            throws UserNotFoundException, ValidationException, EmailDuplicationException {
-       User user = userService.updateUser(userDto, userId);
+            throws NotFoundException, ValidationException, EmailDuplicationException {
+        User user = userService.update(userDto, userId);
         log.info("User updated: {}", user);
         return user;
     }
 
     @GetMapping("/{userId}")
-    public User getUserById(@PathVariable long userId) throws UserNotFoundException {
+    public User getUserById(@PathVariable long userId) throws NotFoundException {
         return userService.getUserById(userId);
     }
 

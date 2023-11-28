@@ -2,28 +2,29 @@ package ru.practicum.shareit.item.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.persistence.*;
 
 /**
  * TODO Sprint add-controllers.
  */
 @Data
 @NoArgsConstructor
+@Entity
+@Table(name = "items")
 public class Item {
-    private Long itemId;
-    @NotBlank
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "item_id")
+    private Long id;
+    @Column(name = "item_name")
     private String name;
-    @Size(min = 3, max = 600)
+    @Column
     private String description;
-    @NotNull
+    @Column(name = "is_available")
     private Boolean available;
-    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
     private User owner;
-    private ItemRequest request;
-
 }

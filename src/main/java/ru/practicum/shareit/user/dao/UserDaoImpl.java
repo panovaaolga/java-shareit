@@ -4,7 +4,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.item.UserNotFoundException;
+import ru.practicum.shareit.item.NotFoundException;
 import ru.practicum.shareit.user.EmailDuplicationException;
 import ru.practicum.shareit.user.User;
 
@@ -21,11 +21,11 @@ public class UserDaoImpl implements UserDao {
     private long count = 0;
 
     @Override
-    public User getUserById(long userId) throws UserNotFoundException {
+    public User getUserById(long userId) throws NotFoundException {
         if (usersMap.containsKey(userId)) {
             return usersMap.get(userId);
         } else {
-            throw new UserNotFoundException("User not found");
+            throw new NotFoundException(User.class.getName());
         }
     }
 
@@ -42,7 +42,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public User update(User user) throws EmailDuplicationException, UserNotFoundException {
+    public User update(User user) throws EmailDuplicationException, NotFoundException {
         if (usersMap.containsKey(user.getId())) {
             if (!user.getEmail().equals(usersMap.get(user.getId()).getEmail())) {
                 if (emailIsAvailable(user.getEmail())) {
@@ -55,7 +55,7 @@ public class UserDaoImpl implements UserDao {
             }
             return usersMap.get(user.getId());
         } else {
-            throw new UserNotFoundException("User not found");
+            throw new NotFoundException(User.class.getName());
         }
     }
 

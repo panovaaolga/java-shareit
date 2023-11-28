@@ -3,8 +3,8 @@ package ru.practicum.shareit.item.dao;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.item.UserNotFoundException;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.ValidationException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,7 +17,7 @@ public class ItemDaoImpl implements ItemDao {
 
     @Override
     public Item saveItem(long userId, Item item) {
-        item.setItemId(countId());
+        item.setId(countId());
         items.compute(userId, (uId, userItems) -> {
             if (userItems == null) {
                 userItems = new ArrayList<>();
@@ -30,17 +30,17 @@ public class ItemDaoImpl implements ItemDao {
     }
 
     @Override
-    public Item updateItem(long userId, Item item) throws UserNotFoundException {
-        if (items.containsKey(userId) && isOwner(userId, item.getItemId())) {
+    public Item updateItem(long userId, Item item) throws ValidationException {
+        if (items.containsKey(userId) && isOwner(userId, item.getId())) {
             Item updatedItem = items.get(userId).stream()
-                    .filter(i -> i.getItemId().equals(item.getItemId())).findFirst().orElseThrow();
+                    .filter(i -> i.getId().equals(item.getId())).findFirst().orElseThrow();
             updatedItem.setName(item.getName());
             updatedItem.setDescription(item.getDescription());
             updatedItem.setAvailable(item.getAvailable());
-            log.info("Updated item: {}", getItemById(item.getItemId()));
+            log.info("Updated item: {}", getItemById(item.getId()));
             return updatedItem;
         } else {
-            throw new UserNotFoundException("You are not owner of this item");
+            throw new ValidationException("You are not owner of this item");
         }
     }
 
@@ -48,7 +48,7 @@ public class ItemDaoImpl implements ItemDao {
     public void deleteItem(long userId, long itemId) {
         if (items.containsKey(userId) && isOwner(userId, itemId)) {
             items.get(userId)
-                    .removeIf(item -> item.getItemId().equals(itemId));
+                    .removeIf(item -> item.getId().equals(itemId));
         }
     }
 
@@ -58,7 +58,7 @@ public class ItemDaoImpl implements ItemDao {
                 .values()
                 .stream()
                 .flatMap(List::stream)
-                .filter(id -> id.getItemId() == itemId)
+                .filter(id -> id.getId() == itemId)
                 .findFirst()
                 .orElseThrow();
     }
@@ -91,7 +91,7 @@ public class ItemDaoImpl implements ItemDao {
 
     private boolean isOwner(long userId, long itemId) {
         return items.get(userId).stream()
-               .map(Item::getItemId)
+               .map(Item::getId)
                .collect(Collectors.toList())
                .contains(itemId);
     }

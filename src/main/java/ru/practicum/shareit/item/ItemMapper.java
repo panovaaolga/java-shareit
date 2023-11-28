@@ -1,6 +1,9 @@
 package ru.practicum.shareit.item;
 
+import ru.practicum.shareit.booking.dto.BookingDtoOutput;
+import ru.practicum.shareit.item.dto.CommentDtoOutput;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoWithDates;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 
@@ -11,7 +14,7 @@ public class ItemMapper {
 
     public static ItemDto mapToItemDto(Item item) {
         ItemDto itemDto = new ItemDto();
-        itemDto.setId(item.getItemId());
+        itemDto.setId(item.getId());
         itemDto.setName(item.getName());
         itemDto.setDescription(item.getDescription());
         itemDto.setAvailable(item.getAvailable());
@@ -39,10 +42,34 @@ public class ItemMapper {
 
     public static Item mapToExistingItem(ItemDto itemDto, long itemId) {
         Item item = new Item();
-        item.setItemId(itemId);
+        item.setId(itemId);
         item.setName(itemDto.getName());
         item.setDescription(itemDto.getDescription());
         item.setAvailable(itemDto.getAvailable());
         return item;
+    }
+
+    public static Item mapToItem(ItemDto itemDto, long itemId, User user) {
+        Item item = new Item();
+        item.setId(itemId);
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
+        item.setAvailable(itemDto.getAvailable());
+        item.setOwner(user);
+        return item;
+    }
+
+    public static ItemDtoWithDates mapToItemDtoWithDates(Item item, BookingDtoOutput lastBooking,
+                                                         BookingDtoOutput nextBooking,
+                                                         List<CommentDtoOutput> comments) {
+        ItemDtoWithDates itemDtoWithDates = new ItemDtoWithDates();
+        itemDtoWithDates.setId(item.getId());
+        itemDtoWithDates.setName(item.getName());
+        itemDtoWithDates.setDescription(item.getDescription());
+        itemDtoWithDates.setAvailable(item.getAvailable());
+        itemDtoWithDates.setLastBooking(lastBooking);
+        itemDtoWithDates.setNextBooking(nextBooking);
+        itemDtoWithDates.setComments(comments);
+        return itemDtoWithDates;
     }
 }

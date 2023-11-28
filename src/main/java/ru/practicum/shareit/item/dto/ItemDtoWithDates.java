@@ -2,14 +2,16 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.Data;
 import ru.practicum.shareit.ValidationGroups;
+import ru.practicum.shareit.booking.dto.BookingDtoOutput;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
+import javax.validation.constraints.Size;
+import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Data
-public class ItemDto {
+public class ItemDtoWithDates {
     @Null(groups = {ValidationGroups.Create.class})
     private Long id;
     @NotBlank(groups = {ValidationGroups.Create.class})
@@ -20,4 +22,7 @@ public class ItemDto {
     private String description;
     @NotNull(groups = {ValidationGroups.Create.class})
     private Boolean available;
+    private BookingDtoOutput lastBooking;
+    private BookingDtoOutput nextBooking;
+    private List<CommentDtoOutput> comments;
 }
