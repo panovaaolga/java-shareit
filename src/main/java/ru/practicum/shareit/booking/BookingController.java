@@ -41,14 +41,19 @@ public class BookingController {
 
     @GetMapping
     public List<Booking> getAllByUser(@RequestHeader("X-Sharer-User-Id") long userId,
-                                         @RequestParam(defaultValue = "ALL") String state)
+                                      @RequestParam(defaultValue = "ALL") String state,
+                                      @RequestParam(defaultValue = "0") int from,
+                                      @RequestParam(defaultValue = "10") int size)
             throws UnsupportedStateException, NotFoundException {
-        return bookingService.getAllByBooker(userId, state);
+        return bookingService.getAllByBooker(userId, state, from, size);
     }
 
     @GetMapping("/owner")
     public List<Booking> getAllByOwner(@RequestHeader("X-Sharer-User-Id") long userId,
-                                          @RequestParam(defaultValue = "ALL") String state) throws UnsupportedStateException, NotFoundException {
-        return bookingService.getAllByItemOwner(userId, state);
+                                       @RequestParam(defaultValue = "ALL") String state,
+                                       @RequestParam(defaultValue = "0") int from,
+                                       @RequestParam(defaultValue = "10") int size) throws UnsupportedStateException,
+            NotFoundException {
+        return bookingService.getAllByItemOwner(userId, state, from, size);
     }
 }

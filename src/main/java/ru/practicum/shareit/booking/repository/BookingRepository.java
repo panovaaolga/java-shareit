@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.Booking;
@@ -16,15 +18,21 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "where u.id = ?1 and " +
             "b.status = ?2 " +
             "order by b.start desc ")
-    List<Booking> findAllByBookerIdAndStatus(long bookerId, Status status);
+    Page<Booking> findAllByBookerIdAndStatus(long bookerId, Status status, Pageable pageable);
+
+    Page<Booking> findAllByBookerIdAndEndBeforeOrderByStartDesc(long bookerId, LocalDateTime now, Pageable pageable);
 
     List<Booking> findAllByBookerIdAndEndBeforeOrderByStartDesc(long bookerId, LocalDateTime now);
 
-    List<Booking> findAllByBookerIdAndStartAfterOrderByStartDesc(long bookerId, LocalDateTime now);
+    Page<Booking> findAllByBookerIdAndStartAfterOrderByStartDesc(long bookerId, LocalDateTime now, Pageable pageable);
 
-    List<Booking> findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(long bookerId, LocalDateTime start, LocalDateTime end);
+    Page<Booking> findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(long bookerId, LocalDateTime start,
+                                                                             LocalDateTime end, Pageable pageable);
 
-    List<Booking> findAllByBookerIdOrderByStartDesc(long bookerId);
+    List<Booking> findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(long bookerId, LocalDateTime start,
+                                                                             LocalDateTime end);
+
+    Page<Booking> findAllByBookerIdOrderByStartDesc(long bookerId, Pageable pageable);
 
     @Query("select b " +
             "from Booking as b " +
@@ -33,7 +41,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "where u.id = ?1 " +
             "and b.status = ?2 " +
             "order by b.start desc")
-    List<Booking> findAllByOwnerAndStatus(long ownerId, Status status);
+    Page<Booking> findAllByOwnerAndStatus(long ownerId, Status status, Pageable pageable);
 
     @Query("select b " +
             "from Booking as b " +
@@ -41,7 +49,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "join i.owner as u " +
             "where u.id = ?1 " +
             "order by b.start desc")
-    List<Booking> findAllByOwner(long ownerId);
+    Page<Booking> findAllByOwner(long ownerId, Pageable pageable);
 
     @Query("select b " +
             "from Booking as b " +
@@ -50,7 +58,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "where u.id = ?1 " +
             "and b.start > ?2 " +
             "order by b.start desc")
-    List<Booking> findAllByOwnerAndStateFuture(long ownerId, LocalDateTime now);
+    Page<Booking> findAllByOwnerAndStateFuture(long ownerId, LocalDateTime now, Pageable pageable);
 
     @Query("select b " +
             "from Booking as b " +
@@ -59,7 +67,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "where u.id = ?1 " +
             "and b.end < ?2 " +
             "order by b.start desc")
-    List<Booking> findAllByOwnerAndStatePast(long ownerId, LocalDateTime now);
+    Page<Booking> findAllByOwnerAndStatePast(long ownerId, LocalDateTime now, Pageable pageable);
 
     @Query("select b " +
             "from Booking as b " +
@@ -69,7 +77,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "and b.start < ?2 " +
             "and b.end > ?2 " +
             "order by b.start desc")
-    List<Booking> findAllByOwnerAndStateCurrent(long ownerId, LocalDateTime now);
+    Page<Booking> findAllByOwnerAndStateCurrent(long ownerId, LocalDateTime now, Pageable pageable);
 
     @Query("select b " +
             "from Booking as b " +

@@ -17,7 +17,9 @@ public interface BookingService {
 
     Booking getBookingById(long bookingId, long userId) throws NotFoundException;
 
-    List<Booking> getAllByBooker(long userId, String state) throws UnsupportedStateException, NotFoundException;
+    List<Booking> getAllByBooker(long userId, String state, int from, int size) throws UnsupportedStateException,
+            NotFoundException;
 
-    List<Booking> getAllByItemOwner(long ownerId, String state) throws UnsupportedStateException, NotFoundException;
+    List<Booking> getAllByItemOwner(long ownerId, String state, int from, int size) throws UnsupportedStateException,
+            NotFoundException;
 }

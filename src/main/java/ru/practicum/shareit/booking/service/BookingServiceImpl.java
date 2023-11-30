@@ -2,6 +2,8 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -74,46 +76,65 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getAllByBooker(long userId, String state) throws UnsupportedStateException, NotFoundException {
+    public List<Booking> getAllByBooker(long userId, String state, int from, int size) throws UnsupportedStateException,
+            NotFoundException {
         userService.getUserById(userId);
+        if (from >= 0 && size > 0) {
             switch (state.toUpperCase(Locale.ROOT)) {
                 case "WAITING":
-                    return bookingRepository.findAllByBookerIdAndStatus(userId, Status.WAITING);
+                    return bookingRepository.findAllByBookerIdAndStatus(userId, Status.WAITING,
+                            PageRequest.of(from / size, size, Sort.by("start").descending())).getContent();
                 case "REJECTED":
-                    return bookingRepository.findAllByBookerIdAndStatus(userId, Status.REJECTED);
+                    return bookingRepository.findAllByBookerIdAndStatus(userId, Status.REJECTED,
+                            PageRequest.of(from / size, size, Sort.by("start").descending())).getContent();
                 case "ALL":
-                    return bookingRepository.findAllByBookerIdOrderByStartDesc(userId);
+                    return bookingRepository.findAllByBookerIdOrderByStartDesc(userId,
+                            PageRequest.of(from / size, size)).getContent();
                 case "PAST":
-                    return bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                    return bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now(),
+                            PageRequest.of(from / size, size, Sort.by("start").descending())).getContent();
                 case "CURRENT":
                     return bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId,
-                            LocalDateTime.now(), LocalDateTime.now());
+                            LocalDateTime.now(), LocalDateTime.now(),
+                            PageRequest.of(from / size, size, Sort.by("start").descending())).getContent();
                 case "FUTURE":
-                    return bookingRepository.findAllByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
+                    return bookingRepository.findAllByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now(),
+                            PageRequest.of(from / size, size, Sort.by("start").descending())).getContent();
                 default:
                     throw new UnsupportedStateException("Unknown state: " + state);
             }
+        }
+        throw new ValidationException("Params with requested values are not allowed");
     }
 
-    public List<Booking> getAllByItemOwner(long ownerId, String state) throws UnsupportedStateException,
+    public List<Booking> getAllByItemOwner(long ownerId, String state, int from, int size) throws UnsupportedStateException,
             NotFoundException {
         userService.getUserById(ownerId);
-        switch (state.toUpperCase(Locale.ROOT)) {
-            case "ALL":
-                return bookingRepository.findAllByOwner(ownerId);
-            case "WAITING":
-                return bookingRepository.findAllByOwnerAndStatus(ownerId, Status.WAITING);
-            case "REJECTED":
-                return bookingRepository.findAllByOwnerAndStatus(ownerId, Status.REJECTED);
-            case "PAST":
-                return bookingRepository.findAllByOwnerAndStatePast(ownerId, LocalDateTime.now());
-            case "CURRENT":
-                return bookingRepository.findAllByOwnerAndStateCurrent(ownerId, LocalDateTime.now());
-            case "FUTURE":
-                return bookingRepository.findAllByOwnerAndStateFuture(ownerId, LocalDateTime.now());
-            default:
-                throw new UnsupportedStateException("Unknown state: " + state.toString());
+        if (from >= 0 && size > 0) {
+            switch (state.toUpperCase(Locale.ROOT)) {
+                case "ALL":
+                    return bookingRepository.findAllByOwner(ownerId,
+                            PageRequest.of(from / size, size, Sort.by("start").descending())).getContent();
+                case "WAITING":
+                    return bookingRepository.findAllByOwnerAndStatus(ownerId, Status.WAITING,
+                            PageRequest.of(from / size, size, Sort.by("start").descending())).getContent();
+                case "REJECTED":
+                    return bookingRepository.findAllByOwnerAndStatus(ownerId, Status.REJECTED,
+                            PageRequest.of(from / size, size, Sort.by("start").descending())).getContent();
+                case "PAST":
+                    return bookingRepository.findAllByOwnerAndStatePast(ownerId, LocalDateTime.now(),
+                            PageRequest.of(from / size, size, Sort.by("start").descending())).getContent();
+                case "CURRENT":
+                    return bookingRepository.findAllByOwnerAndStateCurrent(ownerId, LocalDateTime.now(),
+                            PageRequest.of(from / size, size, Sort.by("start").descending())).getContent();
+                case "FUTURE":
+                    return bookingRepository.findAllByOwnerAndStateFuture(ownerId, LocalDateTime.now(),
+                            PageRequest.of(from / size, size, Sort.by("start").descending())).getContent();
+                default:
+                    throw new UnsupportedStateException("Unknown state: " + state.toString());
+            }
         }
+        throw new ValidationException("Params with requested values are not allowed");
     }
 
     private boolean startDateIsBefore(LocalDateTime startDate, LocalDateTime endDate) {

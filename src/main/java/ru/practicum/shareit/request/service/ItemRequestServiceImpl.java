@@ -14,6 +14,7 @@ import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestDtoInput;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.ValidationException;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequestDto> itemRequestDtos = new ArrayList<>();
         if (userRepository.findById(userId).isPresent()) {
             if (from >= 0 && size > 0) {
-                Page<ItemRequest> requestPage = requestRepository.findAll(PageRequest
+                Page<ItemRequest> requestPage = requestRepository.findAllByAuthorIdNot(userId, PageRequest
                         .of(from/size, size, Sort.by("created").descending()));
 
                 if (requestPage.isEmpty()) {
@@ -79,8 +80,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                     itemRequestDtos.add(RequestMapper.mapToRequestDtoOutput(r, ItemMapper.mapToItemDtoList(itemRepository
                             .findByRequestIdOrderByCreated(r.getId()))));
                 }
+                return itemRequestDtos;
             }
-            return itemRequestDtos;
+            throw new ValidationException("Params with requested values are not allowed");
         }
         throw new NotFoundException(User.class.getName());
     }
