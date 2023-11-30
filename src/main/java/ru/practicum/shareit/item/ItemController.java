@@ -43,8 +43,10 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDtoWithDates> getAllItemsOfUser(@RequestHeader("X-Sharer-User-Id") long userId) {
-        return itemService.getAllItemsByUser(userId);
+    public List<ItemDtoWithDates> getAllItemsOfUser(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                    @RequestParam(defaultValue = "0") int from,
+                                                    @RequestParam(defaultValue = "10") int size) {
+        return itemService.getAllItemsByUser(userId, from, size);
     }
 
     @GetMapping("/{itemId}")

@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
@@ -121,12 +123,15 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDtoWithDates> getAllItemsByUser(long userId) {
+    public List<ItemDtoWithDates> getAllItemsByUser(long userId, int from, int size) {
         List<ItemDtoWithDates> itemsDto = new ArrayList<>();
-        List<Item> items = itemRepository.findAllByOwnerId(userId);
+        Page<Item> items = itemRepository.findAllByOwnerId(userId, PageRequest.of(from/size, size));
         BookingDtoOutput lastBooking = null;
         BookingDtoOutput nextBooking = null;
-        for (Item i : items) {
+        if (items.isEmpty()) {
+            return new ArrayList<>();
+        }
+        for (Item i : items.getContent()) {
             List<CommentDtoOutput> comments = CommentMapper.mapToListDto(commentRepository.findByItemId(i.getId()));
             if (!bookingRepository.findLastBooking(i.getId(), LocalDateTime.now()).isEmpty()) {
                 lastBooking = BookingMapper.mapToBookingDtoOutput(bookingRepository

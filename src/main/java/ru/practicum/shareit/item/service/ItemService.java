@@ -18,7 +18,7 @@ public interface ItemService {
 
     ItemDtoWithDates getItem(long itemId, long userId) throws NotFoundException;
 
-    List<ItemDtoWithDates> getAllItemsByUser(long userId);
+    List<ItemDtoWithDates> getAllItemsByUser(long userId, int from, int size);
 
     void deleteItem(long userId, long itemId);
 
