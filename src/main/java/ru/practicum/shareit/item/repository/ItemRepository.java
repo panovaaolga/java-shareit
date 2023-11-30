@@ -22,4 +22,11 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "join b.item as i " +
             "where i.id = ?1")
     Optional<Item> findByItemIdWithComments(long itemId);
+
+    @Query("select i " +
+            "from Item as i " +
+            "join i.request as r " +
+            "where r.id = ?1 " +
+            "order by r.created desc")
+    List<Item> findByRequestIdOrderByCreated(long requestId);
 }

@@ -19,6 +19,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.user.InsufficientPermissionException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.ValidationException;
@@ -38,6 +40,7 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
+    private final RequestRepository requestRepository;
 
     @Override
     public ItemDto createItem(ItemDto itemDto, long userId) throws NotFoundException {
@@ -50,7 +53,14 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto save(ItemDto itemDto, long userId) throws NotFoundException {
         User user = userService.getUserById(userId);
-        Item item = ItemMapper.mapToNewItem(itemDto, user);
+        Item item;
+        if (itemDto.getRequestId() != null) {
+            ItemRequest itemRequest = requestRepository.findById(itemDto.getRequestId()).orElseThrow(() ->
+                    new NotFoundException(ItemRequest.class.getName()));
+            item = ItemMapper.mapToNewItem(itemDto, user, itemRequest);
+            return ItemMapper.mapToItemDto(itemRepository.save(item));
+        }
+        item = ItemMapper.mapToNewItem(itemDto, user);
         return ItemMapper.mapToItemDto(itemRepository.save(item));
     }
 
