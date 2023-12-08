@@ -1,7 +1,7 @@
 package ru.practicum.shareit.item.dao;
 
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.ValidationException;
+import ru.practicum.shareit.ValidationException;
 
 import java.util.List;
 

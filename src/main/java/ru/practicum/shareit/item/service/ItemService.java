@@ -1,12 +1,12 @@
 package ru.practicum.shareit.item.service;
 
-import ru.practicum.shareit.item.NotFoundException;
+import ru.practicum.shareit.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDtoInput;
 import ru.practicum.shareit.item.dto.CommentDtoOutput;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithDates;
-import ru.practicum.shareit.user.InsufficientPermissionException;
-import ru.practicum.shareit.user.ValidationException;
+import ru.practicum.shareit.item.InsufficientPermissionException;
+import ru.practicum.shareit.ValidationException;
 
 import java.util.List;
 

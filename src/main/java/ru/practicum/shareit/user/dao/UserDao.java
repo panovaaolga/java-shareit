@@ -1,9 +1,9 @@
 package ru.practicum.shareit.user.dao;
 
-import ru.practicum.shareit.item.NotFoundException;
+import ru.practicum.shareit.NotFoundException;
 import ru.practicum.shareit.user.EmailDuplicationException;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.ValidationException;
+import ru.practicum.shareit.ValidationException;
 
 import java.util.List;
 

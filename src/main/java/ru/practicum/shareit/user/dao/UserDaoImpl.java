@@ -4,7 +4,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.item.NotFoundException;
+import ru.practicum.shareit.NotFoundException;
 import ru.practicum.shareit.user.EmailDuplicationException;
 import ru.practicum.shareit.user.User;
 

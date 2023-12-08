@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.ItemMapper;
-import ru.practicum.shareit.item.NotFoundException;
+import ru.practicum.shareit.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.ItemRequest;
@@ -14,13 +14,11 @@ import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestDtoInput;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.ValidationException;
+import ru.practicum.shareit.ValidationException;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor

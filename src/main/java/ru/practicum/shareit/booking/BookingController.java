@@ -5,8 +5,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.item.NotFoundException;
-import ru.practicum.shareit.user.ValidationException;
+import ru.practicum.shareit.NotFoundException;
+import ru.practicum.shareit.ValidationException;
 
 import java.util.List;
 

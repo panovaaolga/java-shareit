@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.ValidationException;
+import ru.practicum.shareit.ValidationException;
 
 import java.util.*;
 import java.util.stream.Collectors;
