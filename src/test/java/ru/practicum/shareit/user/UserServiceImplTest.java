@@ -116,6 +116,56 @@ public class UserServiceImplTest {
     }
 
     @Test
+    void updateUser_whenNotFound_thenThrow() {
+        User newUser = new User();
+        newUser.setName("new name");
+        newUser.setEmail("email@mail.ru");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        verify(userRepository, never()).save(newUser);
+        assertThrows(NotFoundException.class, () -> userService.update(UserMapper.mapToUserDto(newUser), userId));
+    }
+
+    @Test
+    void updateUser_whenEmailEmpty_thenUpdate() {
+        User oldUser = new User();
+        oldUser.setName(NAME);
+        oldUser.setEmail(EMAIL);
+
+        UserDto newUser = new UserDto();
+        newUser.setName("new name");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(oldUser));
+
+        userService.update(newUser, userId);
+        verify(userRepository).save(userArgumentCaptor.capture());
+        User savedUser = userArgumentCaptor.getValue();
+
+        assertEquals("new name", savedUser.getName());
+        assertEquals(EMAIL, savedUser.getEmail());
+    }
+
+    @Test
+    void updateUser_whenNameEmpty_thenUpdate() {
+        User oldUser = new User();
+        oldUser.setName(NAME);
+        oldUser.setEmail(EMAIL);
+
+        UserDto newUser = new UserDto();
+        newUser.setEmail("newemail@gmail.com");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(oldUser));
+
+        userService.update(newUser, userId);
+        verify(userRepository).save(userArgumentCaptor.capture());
+        User savedUser = userArgumentCaptor.getValue();
+
+        assertEquals(NAME, savedUser.getName());
+        assertEquals("newemail@gmail.com", savedUser.getEmail());
+    }
+
+    @Test
     void createUser_whenNameValid_thenReturn() {
         User expectedUser = new User(userId, NAME, EMAIL);
         UserDto userDto = new UserDto(NAME, EMAIL);

@@ -45,34 +45,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-//    public User updateUser(UserDto userDto, long userId)
-//            throws NotFoundException, ValidationException, EmailDuplicationException {
-//        try {
-//            User user = new User();
-//            if (userDto.getName() != null && userDto.getEmail() != null) {
-//                user = UserMapper.mapToUser(userDto);
-//                user.setId(userId);
-//            } else {
-//                user.setId(userId);
-//                if (userDto.getName() != null) {
-//                    user.setName(userDto.getName());
-//                    user.setEmail(userDao.getUserById(userId).getEmail());
-//                }
-//                if (userDto.getEmail() != null) {
-//                    user.setEmail(userDto.getEmail());
-//                    user.setName(userDao.getUserById(userId).getName());
-//                }
-//            }
-//            return userDao.update(user);
-//        } catch (NotFoundException e) {
-//            log.info(e.getMessage());
-//            throw new NotFoundException(User.class.getName());
-//        } catch (EmailDuplicationException e) {
-//            log.info(e.getMessage());
-//            throw new EmailDuplicationException(e.getMessage());
-//        }
-//    }
-
     public User getUserById(long userId) throws NotFoundException {
         try {
             return userRepository.findById(userId).orElseThrow();

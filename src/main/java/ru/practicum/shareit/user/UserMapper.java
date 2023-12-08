@@ -21,13 +21,13 @@ public class UserMapper {
         return user;
     }
 
-    public static List<UserDto> mapToUserDtoList(List<User> users) {
-        List<UserDto> usersDto = new ArrayList<>();
-        if (!users.isEmpty()) {
-            for (User u : users) {
-                usersDto.add(mapToUserDto(u));
-            }
-        }
-        return usersDto;
-    }
+//    public static List<UserDto> mapToUserDtoList(List<User> users) {
+//        List<UserDto> usersDto = new ArrayList<>();
+//        if (!users.isEmpty()) {
+//            for (User u : users) {
+//                usersDto.add(mapToUserDto(u));
+//            }
+//        }
+//        return usersDto;
+//    }
 }
