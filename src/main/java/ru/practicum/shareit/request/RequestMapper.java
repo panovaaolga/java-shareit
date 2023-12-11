@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestDtoInput;
@@ -8,6 +9,7 @@ import ru.practicum.shareit.user.User;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 public class RequestMapper {
 
     public static ItemRequest mapToItemRequest(ItemRequestDtoInput dtoInput, User author) {

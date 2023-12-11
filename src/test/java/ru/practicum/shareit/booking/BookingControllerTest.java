@@ -66,7 +66,7 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(expectedBooking.getId()), Long.class))
-                .andExpect(jsonPath("$.status", is(Status.WAITING)));
+                .andExpect(jsonPath("$.status", is(Status.WAITING.toString())));
     }
 
     @Test

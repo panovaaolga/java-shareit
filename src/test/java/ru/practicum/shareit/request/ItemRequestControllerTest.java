@@ -36,26 +36,27 @@ public class ItemRequestControllerTest {
     ObjectMapper mapper;
 
     @MockBean
-    ItemRequestService itemRequestService;
+    ItemRequestService requestService;
 
     @Autowired
     private MockMvc mvc;
 
     long requestId = 1L;
     long userId = 1L;
+    LocalDateTime now = LocalDateTime.now();
     private User author = new User(userId, "name", "email@gmail.com");
     private ItemRequestDtoInput requestDto = new ItemRequestDtoInput("some description");
     private ItemRequest expectedRequest = new ItemRequest(requestId, "some description",
-            LocalDateTime.now(), author);
+            now, author);
 
     @Test
     void createRequest() throws Exception { //переписать
-        when(itemRequestService.createRequest(userId, requestDto))
+        when(requestService.createRequest(userId, requestDto))
                 .thenReturn(RequestMapper.mapToRequestDtoOutput(expectedRequest, List.of()));
 
         mvc.perform(post("/requests")
                 .content(mapper.writeValueAsString(requestDto))
-                .header("X-Sharer-User-Id", 1L)
+                .header("X-Sharer-User-Id", userId)
                 .characterEncoding(StandardCharsets.UTF_8)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
@@ -66,7 +67,7 @@ public class ItemRequestControllerTest {
 
     @Test
     void getById_whenUserCorrect_thenReturn() throws Exception {
-        when(itemRequestService.getRequestById(userId, requestId))
+        when(requestService.getRequestById(userId, requestId))
                 .thenReturn(RequestMapper.mapToRequestDtoOutput(expectedRequest, new ArrayList<>()));
 
         mvc.perform(get("/requests/{requestId}", requestId)
@@ -78,7 +79,7 @@ public class ItemRequestControllerTest {
 
     @Test
     void getAllRequests_whenArgsCorrect_thenReturn() throws Exception {
-        when(itemRequestService.getAllRequests(anyLong(), anyInt(), anyInt()))
+        when(requestService.getAllRequests(anyLong(), anyInt(), anyInt()))
                 .thenReturn(List.of(new ItemRequestDto()));
 
         mvc.perform(get("/requests/all")
@@ -88,7 +89,7 @@ public class ItemRequestControllerTest {
 
     @Test
     void getAllByUser() throws Exception {
-        when(itemRequestService.getRequestsByOwner(userId))
+        when(requestService.getRequestsByOwner(userId))
                 .thenReturn(List.of(RequestMapper.mapToRequestDtoOutput(expectedRequest, List.of())));
 
         mvc.perform(get("/requests")

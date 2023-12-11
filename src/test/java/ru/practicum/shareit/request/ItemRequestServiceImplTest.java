@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.NotFoundException;
@@ -52,16 +53,31 @@ public class ItemRequestServiceImplTest {
 
     long requestId = 1L;
     long userId = 1L;
+    LocalDateTime now = LocalDateTime.now();
     private User author = new User(userId, "name", "email@gmail.com");
-    private ItemRequestDtoInput requestDto = new ItemRequestDtoInput("some description");
+    private ItemRequestDtoInput requestDtoInput = new ItemRequestDtoInput("some description");
     private ItemRequest expectedRequest = new ItemRequest(requestId, "some description",
-            LocalDateTime.now(), author);
+            now, author);
     private ItemRequest secondExpectedRequest = new ItemRequest(2L, "some description",
-            LocalDateTime.now(), author);
+            now, author);
+    private ItemRequestDto itemRequestDto = new ItemRequestDto(requestId, "some description", now, List.of());
 
     @Test
-    void createRequest() {
+    void createRequest_whenDataCorrect_thenReturn() {
+        when(userRepository.findById(userId)).thenReturn(Optional.of(author));
+        when(requestRepository.save(RequestMapper.mapToItemRequest(requestDtoInput, author))).thenReturn(expectedRequest);
 
+        ItemRequestDto savedItemRequestDto = requestService.createRequest(userId, requestDtoInput);
+
+        assertEquals(expectedRequest.getId(), savedItemRequestDto.getId());
+        assertEquals(expectedRequest.getDescription(), savedItemRequestDto.getDescription());
+    }
+
+    @Test
+    void createRequest_whenUserNotFound_thenThrow() {
+        when(userRepository.findById(userId)).thenThrow(NotFoundException.class);
+
+        assertThrows(NotFoundException.class, () ->requestService.createRequest(userId, requestDtoInput));
     }
 
     @Test
@@ -73,7 +89,7 @@ public class ItemRequestServiceImplTest {
         ItemRequestDto actualRequest = requestService.getRequestById(userId, requestId);
 
         assertEquals(expectedRequest.getId(), actualRequest.getId(), "Id should be the same");
-        assertEquals(requestDto.getDescription(), actualRequest.getDescription());
+        assertEquals(requestDtoInput.getDescription(), actualRequest.getDescription());
 
     }
 
@@ -81,6 +97,13 @@ public class ItemRequestServiceImplTest {
     void getRequestById_whenRequestNotFound_thenThrow() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(new User()));
         when(requestRepository.findById(requestId)).thenThrow(NotFoundException.class);
+
+        assertThrows(NotFoundException.class, () -> requestService.getRequestById(userId, requestId));
+    }
+
+    @Test
+    void getRequestById_whenUserNotFound_thenThrow() {
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> requestService.getRequestById(userId, requestId));
     }
@@ -95,7 +118,7 @@ public class ItemRequestServiceImplTest {
 
     @Test
     void getRequestsByOwner_whenUserNotFound_thenThrow() {
-        when(userRepository.findById(userId)).thenThrow(NotFoundException.class);
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> requestService.getRequestsByOwner(userId));
     }
@@ -130,14 +153,22 @@ public class ItemRequestServiceImplTest {
         assertThrows(ValidationException.class, () -> requestService.getAllRequests(userId, -1, 10));
     }
 
-//    @Test
-//    void getAllRequests_whenArgsCorrectNotEmpty_thenReturn() {
-//        when(userRepository.findById(userId)).thenReturn(Optional.of(new User()));
-//        when(requestRepository.findAllByAuthorIdNot(userId,
-//                PageRequest.of(0, 10, Sort.by("created").descending())))
-//                .thenReturn((List.of(expectedRequest, secondExpectedRequest)));
-//
-//
-//        assertEquals(2, requestService.getAllRequests(userId, 0, 10).size());
-//    }
+    @Test
+    void getAllRequests_whenArgsCorrectNotEmpty_thenReturn() {
+        PageImpl<ItemRequest> itemRequests = new PageImpl<>(List.of(expectedRequest, secondExpectedRequest));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(new User()));
+        when(requestRepository.findAllByAuthorIdNot(userId,
+                PageRequest.of(0, 10, Sort.by("created").descending())))
+                .thenReturn(itemRequests);
+
+
+        assertEquals(2, requestService.getAllRequests(userId, 0, 10).size());
+    }
+
+    @Test
+    void getAllRequests_whenUserNotFound_thenThrow() {
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> requestService.getAllRequests(userId, 0, 10));
+    }
 }
