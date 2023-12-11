@@ -12,7 +12,6 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.CommentMapper;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.NotFoundException;
-import ru.practicum.shareit.item.dao.ItemDao;
 import ru.practicum.shareit.item.dto.CommentDtoInput;
 import ru.practicum.shareit.item.dto.CommentDtoOutput;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -37,20 +36,11 @@ import java.util.List;
 @Service
 @Slf4j
 public class ItemServiceImpl implements ItemService {
-    private final ItemDao itemDao;
     private final UserServiceImpl userService;
     private final CommentRepository commentRepository;
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
     private final RequestRepository requestRepository;
-
-    @Override
-    public ItemDto createItem(ItemDto itemDto, long userId) throws NotFoundException {
-        User user = userService.getUserById(userId);
-        Item item = ItemMapper.mapToNewItem(itemDto, user);
-        itemDao.saveItem(userId, item);
-        return ItemMapper.mapToItemDto(item);
-    }
 
     @Override
     public ItemDto save(ItemDto itemDto, long userId) throws NotFoundException {
@@ -64,22 +54,6 @@ public class ItemServiceImpl implements ItemService {
         }
         item = ItemMapper.mapToNewItem(itemDto, user);
         return ItemMapper.mapToItemDto(itemRepository.save(item));
-    }
-
-    @Override
-    public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) throws ValidationException {
-        Item itemBefore = ItemMapper.mapToExistingItem(itemDto, itemId);
-        log.info("itemBefore: {}", itemBefore);
-        if (itemBefore.getName() == null) {
-            itemBefore.setName(itemDao.getItemById(itemId).getName());
-        }
-        if (itemBefore.getDescription() == null) {
-            itemBefore.setDescription(itemDao.getItemById(itemId).getDescription());
-        }
-        if (itemBefore.getAvailable() == null) {
-            itemBefore.setAvailable(itemDao.getItemById(itemId).getAvailable());
-        }
-        return ItemMapper.mapToItemDto(itemDao.updateItem(userId, itemBefore));
     }
 
     @Override
@@ -161,8 +135,6 @@ public class ItemServiceImpl implements ItemService {
         if (text.isEmpty()) {
             return new ArrayList<>();
         }
-        log.info("Searched items: {}", itemRepository.findByNameOrDescriptionContainingIgnoreCaseAndAvailableTrue(text,
-                text));
         return ItemMapper.mapToItemDtoList(itemRepository
                 .findByNameOrDescriptionContainingIgnoreCaseAndAvailableTrue(text, text));
     }
@@ -173,8 +145,8 @@ public class ItemServiceImpl implements ItemService {
         User author = userService.getUserById(authorId);
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException(Item.class.getName()));
         if (isPastBooker(authorId, itemId)) {
-            Comment comment = CommentMapper.mapToNewComment(commentDtoInput, author, item);
-            return CommentMapper.mapToCommentOutput(commentRepository.save(comment));
+            return CommentMapper.mapToCommentOutput(commentRepository
+                    .save(CommentMapper.mapToNewComment(commentDtoInput, author, item)));
         } else {
             throw new ValidationException("You did not book this item");
         }

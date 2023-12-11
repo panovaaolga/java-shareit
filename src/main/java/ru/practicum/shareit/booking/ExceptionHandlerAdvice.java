@@ -12,7 +12,6 @@ public class ExceptionHandlerAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(UnsupportedStateException.class)
     public ErrorMessage handleException(UnsupportedStateException e) {
-        ErrorMessage message = new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-        return message;
+        return new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 }

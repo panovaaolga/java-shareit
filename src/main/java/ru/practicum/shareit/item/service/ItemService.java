@@ -12,10 +12,6 @@ import java.util.List;
 
 public interface ItemService {
 
-    ItemDto createItem(ItemDto itemDto, long userId) throws NotFoundException;
-
-    ItemDto updateItem(long userId, long itemId, ItemDto itemDto) throws NotFoundException, ValidationException;
-
     ItemDtoWithDates getItem(long itemId, long userId) throws NotFoundException;
 
     List<ItemDtoWithDates> getAllItemsByUser(long userId, int from, int size);

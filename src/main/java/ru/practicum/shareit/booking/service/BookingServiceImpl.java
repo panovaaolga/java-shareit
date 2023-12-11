@@ -131,7 +131,7 @@ public class BookingServiceImpl implements BookingService {
                     return bookingRepository.findAllByOwnerAndStateFuture(ownerId, LocalDateTime.now(),
                             PageRequest.of(from / size, size, Sort.by("start").descending())).getContent();
                 default:
-                    throw new UnsupportedStateException("Unknown state: " + state.toString());
+                    throw new UnsupportedStateException("Unknown state: " + state);
             }
         }
         throw new ValidationException("Params with requested values are not allowed");
