@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import ru.practicum.shareit.NotFoundException;
+import ru.practicum.shareit.ValidationException;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -29,7 +30,6 @@ import ru.practicum.shareit.user.service.UserServiceImpl;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,17 +62,17 @@ public class ItemServiceImplTest {
     private ArgumentCaptor<Booking> userArgumentCaptor;
 
     long itemId = 1L;
-    private User user = new User(2L, "n", "email@gmail.com");
-    private User booker = new User(1L, "n", "email@mail.ru");
-    private Item item = new Item(itemId, "name", "text", true, user, null);
-    private Booking booking = new Booking(1L,
+    User owner = new User(2L, "n", "email@gmail.com");
+    User booker = new User(1L, "n", "email@mail.ru");
+    Item item = new Item(itemId, "name", "text", true, owner, null);
+    Booking booking = new Booking(1L,
             LocalDateTime.of(2024, Month.MARCH, 23, 14, 12),
             LocalDateTime.of(2024, Month.MARCH, 25, 14, 12),
             Status.WAITING, booker, item);
-    private User author = new User(3L, "n", "desc");
-    private CommentDtoInput commentDtoInput = new CommentDtoInput("comment");
-    private Comment comment = new Comment(1L, "comment", Instant.now(), item, booker);
-    private Booking pastBooking = new Booking(2L,
+    User wrongAuthor = new User(3L, "n", "desc");
+    CommentDtoInput commentDtoInput = new CommentDtoInput("comment");
+    Comment comment = new Comment(1L, "comment", Instant.now(), item, booker);
+    Booking pastBooking = new Booking(2L,
             LocalDateTime.of(2023, Month.MARCH, 23, 14, 12),
             LocalDateTime.of(2023, Month.MARCH, 25, 14, 12),
             Status.APPROVED, booker, item);
@@ -83,17 +83,30 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void update() {
+    void update_whenItemNotFound_thenThrow() {
+        ItemDto itemDto = new ItemDto(itemId, item.getName(), item.getDescription(), item.getAvailable(), null);
+        when(itemRepository.findByOwnerIdAndId(owner.getId(), itemId)).thenReturn(Optional.empty());
 
+        assertThrows(NotFoundException.class, () -> itemService.update(owner.getId(), itemId, itemDto));
+    }
+
+    @Test
+    void update_whenUserNotOwner_thenThrow() {
+        ItemDto itemDto = new ItemDto(itemId, item.getName(), item.getDescription(), item.getAvailable(), null);
+        when(itemRepository.findByOwnerIdAndId(wrongAuthor.getId(), itemId)).thenReturn(Optional.of(item));
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+
+        assertThrows(InsufficientPermissionException.class, () -> itemService
+                .update(wrongAuthor.getId(), itemId, itemDto));
     }
 
     @Test
     void getItem_whenItemFound_thenReturn() {
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(commentRepository.findByItemId(itemId)).thenReturn(List.of());
-        when(itemRepository.findByOwnerIdAndId(user.getId(), itemId)).thenReturn(Optional.empty());
+        when(itemRepository.findByOwnerIdAndId(owner.getId(), itemId)).thenReturn(Optional.empty());
 
-        ItemDtoWithDates returnedItem = itemService.getItem(itemId, user.getId());
+        ItemDtoWithDates returnedItem = itemService.getItem(itemId, owner.getId());
 
         assertEquals(item.getId(), returnedItem.getId());
         assertEquals(item.getDescription(), returnedItem.getDescription());
@@ -104,11 +117,11 @@ public class ItemServiceImplTest {
         LocalDateTime now = LocalDateTime.now();
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(commentRepository.findByItemId(itemId)).thenReturn(List.of());
-        when(itemRepository.findByOwnerIdAndId(user.getId(), itemId)).thenReturn(Optional.of(item));
+        when(itemRepository.findByOwnerIdAndId(owner.getId(), itemId)).thenReturn(Optional.of(item));
         when(bookingRepository.findNextBooking(itemId, now)).thenReturn(List.of(booking));
         when(bookingRepository.findLastBooking(itemId, now)).thenReturn(List.of());
 
-        ItemDtoWithDates returnedItem = itemService.getItem(itemId, user.getId());
+        ItemDtoWithDates returnedItem = itemService.getItem(itemId, owner.getId());
         System.out.println(returnedItem);
 
         assertEquals(item.getId(), returnedItem.getId());
@@ -120,7 +133,7 @@ public class ItemServiceImplTest {
     void getItem_whenItemNotFound_thenThrow() {
         when(itemRepository.findById(itemId)).thenThrow(NotFoundException.class);
 
-        assertThrows(NotFoundException.class, () -> itemService.getItem(itemId, user.getId()));
+        assertThrows(NotFoundException.class, () -> itemService.getItem(itemId, owner.getId()));
     }
 
     @Test
@@ -144,23 +157,48 @@ public class ItemServiceImplTest {
 
     @Test
     void deleteItem() {
-        itemService.deleteItem(user.getId(), itemId);
+        itemService.deleteItem(owner.getId(), itemId);
 
-        verify(itemRepository, times(1)).deleteByOwnerIdAndId(user.getId(), itemId);
+        verify(itemRepository, times(1)).deleteByOwnerIdAndId(owner.getId(), itemId);
     }
 
     @Test
     void addComment_whenAuthorCorrect_thenReturn() {
         when(userService.getUserById(booker.getId())).thenReturn(booker);
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
-        when(commentRepository.save(CommentMapper.mapToNewComment(commentDtoInput, booker, item)))
-                .thenReturn(comment);
         when(itemRepository.findByItemIdWithComments(itemId)).thenReturn(Optional.of(item));
         when(bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(booker.getId(),
-                        LocalDateTime.now())).thenReturn(List.of(pastBooking));
+                LocalDateTime.now())).thenReturn(List.of(pastBooking));
+        when(commentRepository.save(CommentMapper.mapToNewComment(commentDtoInput, booker, item)))
+                .thenReturn(comment);
 
         CommentDtoOutput commentDtoOutput = itemService.addComment(commentDtoInput, booker.getId(), itemId);
 
         assertEquals(commentDtoInput.getText(), commentDtoOutput.getText());
+    }
+
+    @Test
+    void addComment_whenAuthorCorrectCurrent_thenReturn() {
+        when(userService.getUserById(booker.getId())).thenReturn(booker);
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        when(commentRepository.save(CommentMapper.mapToNewComment(commentDtoInput, booker, item)))
+                .thenReturn(comment);
+        when(itemRepository.findByItemIdWithComments(itemId)).thenReturn(Optional.of(item));
+        when(bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(booker.getId(),
+                LocalDateTime.now(), LocalDateTime.now())).thenReturn(List.of(pastBooking));
+
+        CommentDtoOutput commentDtoOutput = itemService.addComment(commentDtoInput, booker.getId(), itemId);
+
+        assertEquals(commentDtoInput.getText(), commentDtoOutput.getText());
+    }
+
+    @Test
+    void addComment_whenAuthorNotBooker_thenThrow() {
+        when(userService.getUserById(booker.getId())).thenReturn(booker);
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        when(itemRepository.findByItemIdWithComments(itemId)).thenReturn(Optional.empty());
+
+        assertThrows(ValidationException.class, () -> itemService
+                .addComment(commentDtoInput, wrongAuthor.getId(), itemId));
     }
 }

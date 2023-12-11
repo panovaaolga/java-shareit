@@ -171,6 +171,7 @@ public class ItemServiceImpl implements ItemService {
                 return true;
             }
         }
+        log.info("here");
         bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(authorId, LocalDateTime.now(),
                 LocalDateTime.now());
         for (Booking b : bookings) {
