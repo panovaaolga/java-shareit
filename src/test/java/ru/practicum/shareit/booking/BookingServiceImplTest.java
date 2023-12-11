@@ -326,8 +326,6 @@ public class BookingServiceImplTest {
         assertEquals(expectedBooking.getItem().getDescription(), bookings.get(0).getItem().getDescription());
     }
 
-
-
     @Test
     void getAllByOwner_whenUserFoundAndStateAll_thenReturn() {
         Booking firstBooking = new Booking(1L, bookingDto.getStart(), bookingDto.getEnd(),
