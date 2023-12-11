@@ -69,7 +69,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         if (userRepository.findById(userId).isPresent()) {
             if (from >= 0 && size > 0) {
                 Page<ItemRequest> requestPage = requestRepository.findAllByAuthorIdNot(userId, PageRequest
-                        .of(from/size, size, Sort.by("created").descending()));
+                        .of(from / size, size, Sort.by("created").descending()));
 
                 if (requestPage.isEmpty()) {
                     return new ArrayList<>();

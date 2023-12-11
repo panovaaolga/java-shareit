@@ -16,7 +16,6 @@ import ru.practicum.shareit.item.dto.CommentDtoInput;
 import ru.practicum.shareit.item.dto.CommentDtoOutput;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithDates;
-import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -102,7 +101,7 @@ public class ItemServiceImpl implements ItemService {
         if (from < 0 && size <= 0) {
             throw new ValidationException("Params with requested values are not allowed");
         }
-        Page<Item> items = itemRepository.findAllByOwnerId(userId, PageRequest.of(from/size, size));
+        Page<Item> items = itemRepository.findAllByOwnerId(userId, PageRequest.of(from / size, size));
         BookingDtoOutput lastBooking = null;
         BookingDtoOutput nextBooking = null;
         if (items.isEmpty()) {
