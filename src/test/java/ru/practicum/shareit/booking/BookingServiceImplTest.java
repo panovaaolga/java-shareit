@@ -60,7 +60,8 @@ public class BookingServiceImplTest {
 
     long itemId = 1L;
     long bookerId = 1L;
-    private User owner =  new User(2L, "n", "email@gmail.com");
+    long ownerId = 2L;
+    private User owner =  new User(ownerId, "n", "email@gmail.com");
     private Item item = new Item(itemId, "name", "desc", true,
             owner, null);
     private User booker = new User(bookerId, "name", "email@gmail.com");
@@ -94,6 +95,26 @@ public class BookingServiceImplTest {
     }
 
     @Test
+    void createBooking_whenItemNotAvailable_thenThrow() {
+        item.setAvailable(false);
+        BookingDto expectedBookingDto = new BookingDto(itemId, bookingDto.getEnd(), bookingDto.getStart());
+        when(userService.getUserById(bookerId)).thenReturn(booker);
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+
+        assertThrows(ValidationException.class, () -> bookingService.createBooking(expectedBookingDto, bookerId));
+    }
+
+    @Test
+    void createBooking_whenOwnerIsBooker_thenThrow() {
+        item.setOwner(booker);
+        BookingDto expectedBookingDto = new BookingDto(itemId, bookingDto.getEnd(), bookingDto.getStart());
+        when(userService.getUserById(bookerId)).thenReturn(booker);
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+
+        assertThrows(NotFoundException.class, () -> bookingService.createBooking(expectedBookingDto, bookerId));
+    }
+
+    @Test
     void approveBooking_whenStatusWaiting_thenApprove() {
         Booking expectedBooking = new Booking(1L, bookingDto.getStart(), bookingDto.getEnd(),
                 Status.WAITING, booker, item);
@@ -108,11 +129,34 @@ public class BookingServiceImplTest {
     }
 
     @Test
+    void approveBooking_whenStatusWaiting_thenReject() {
+        Booking expectedBooking = new Booking(1L, bookingDto.getStart(), bookingDto.getEnd(),
+                Status.WAITING, booker, item);
+        Booking rejectedBooking = new Booking(1L, bookingDto.getStart(), bookingDto.getEnd(),
+                Status.REJECTED, booker, item);
+        when(bookingRepository.findById(1L)).thenReturn(Optional.of(expectedBooking));
+        when(bookingRepository.save(expectedBooking)).thenReturn(rejectedBooking);
+
+        Booking savedBooking = bookingService.approveBooking(2L, 1L, false);
+
+        assertEquals(rejectedBooking.getStatus(), savedBooking.getStatus());
+    }
+
+    @Test
     void approveBooking_whenBookingNotFound_thenThrow() {
         when(bookingRepository.findById(1L)).thenThrow(NotFoundException.class);
 
         assertThrows(NotFoundException.class, () -> bookingService
-                .approveBooking(2L, 1L, true));
+                .approveBooking(owner.getId(), 1L, true));
+    }
+
+    @Test
+    void approveBooking_whenUserNotOwner_thenThrow() {
+        Booking expectedBooking = new Booking(1L, bookingDto.getStart(), bookingDto.getEnd(),
+                Status.WAITING, booker, item);
+        when(bookingRepository.findById(1L)).thenReturn(Optional.of(expectedBooking));
+
+        assertThrows(NotFoundException.class, () -> bookingService.approveBooking(bookerId, 1L, true));
     }
 
     @Test
@@ -142,6 +186,15 @@ public class BookingServiceImplTest {
         when(bookingRepository.findById(anyLong())).thenThrow(NotFoundException.class);
 
         assertThrows(NotFoundException.class, () -> bookingService.getBookingById(1L, bookerId));
+    }
+
+    @Test
+    void getBookingById_whenWrongUser_thenThrow() {
+        Booking expectedBooking = new Booking(1L, bookingDto.getStart(), bookingDto.getEnd(),
+                Status.WAITING, booker, item);
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(expectedBooking));
+
+        assertThrows(NotFoundException.class, () -> bookingService.getBookingById(1L, 4L));
     }
 
     @Test
@@ -213,6 +266,43 @@ public class BookingServiceImplTest {
     }
 
     @Test
+    void getAllByBooker_whenUserFoundAndStateFuture_thenReturn() {
+        Booking firstBooking = new Booking(1L, LocalDateTime.of(2024, Month.MARCH, 23, 14, 12),
+                LocalDateTime.of(2024, Month.MARCH, 25, 14, 12),
+                Status.APPROVED, booker, item);
+        Booking secondBooking = new Booking(2L, LocalDateTime.of(2024, Month.MARCH, 23, 14, 12),
+                LocalDateTime.of(2024, Month.MARCH, 25, 14, 12),
+                Status.REJECTED, booker, item);
+        PageImpl<Booking> bookingPage = new PageImpl<>(List.of(firstBooking, secondBooking));
+        when(bookingRepository.findAllByBookerIdAndStartAfterOrderByStartDesc(bookerId, LocalDateTime.now(),
+                PageRequest.of(0, 10, Sort.by("start").descending())))
+                .thenReturn(bookingPage);
+
+        List<Booking> bookings = bookingService.getAllByBooker(bookerId, State.FUTURE.toString(), 0, 10);
+
+        assertEquals(2, bookings.size());
+        assertEquals(firstBooking.getItem().getDescription(), bookings.get(0).getItem().getDescription());
+        assertEquals(secondBooking.getStatus(), bookings.get(1).getStatus());
+    }
+
+    @Test
+    void getAllByBooker_whenUserFoundAndStateCurrent_thenReturn() {
+        Booking currentBooking = new Booking(2L, LocalDateTime.of(2023, Month.MARCH, 23, 14, 12),
+                LocalDateTime.of(2024, Month.MARCH, 25, 14, 12),
+                Status.APPROVED, booker, item);
+        PageImpl<Booking> bookingPage = new PageImpl<>(List.of(currentBooking));
+        when(bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(bookerId, LocalDateTime.now(),
+                LocalDateTime.now(), PageRequest.of(0, 10, Sort.by("start").descending())))
+                .thenReturn(bookingPage);
+
+        List<Booking> bookings = bookingService.getAllByBooker(bookerId, State.CURRENT.toString(), 0, 10);
+
+        assertEquals(1, bookings.size());
+        assertEquals(currentBooking.getItem().getDescription(), bookings.get(0).getItem().getDescription());
+        assertEquals(currentBooking.getStatus(), bookings.get(0).getStatus());
+    }
+
+    @Test
     void getAllByBooker_whenStatusInvalid_thenThrow() {
         assertThrows(UnsupportedStateException.class, () -> bookingService
                 .getAllByBooker(bookerId, "Unsupported state", 0, 10));
@@ -237,6 +327,23 @@ public class BookingServiceImplTest {
 
         assertEquals(1, bookings.size());
         assertEquals(expectedBooking.getItem().getDescription(), bookings.get(0).getItem().getDescription());
+    }
+    @Test
+    void getAllByOwner_whenUserFoundAndStateAll_thenReturn() {
+        Booking firstBooking = new Booking(1L, bookingDto.getStart(), bookingDto.getEnd(),
+                Status.REJECTED, booker, item);
+        Booking secondBooking = new Booking(2L, bookingDto.getStart(), bookingDto.getEnd(),
+                Status.WAITING, booker, item);
+        PageImpl<Booking> bookingPage = new PageImpl<>(List.of(firstBooking, secondBooking));
+        when(bookingRepository.findAllByOwner(owner.getId(),
+                PageRequest.of(0, 10, Sort.by("start").descending())))
+                .thenReturn(bookingPage);
+
+        List<Booking> bookings = bookingService.getAllByItemOwner(owner.getId(), State.ALL.toString(), 0, 10);
+
+        assertEquals(2, bookings.size());
+        assertEquals(firstBooking.getItem().getDescription(), bookings.get(0).getItem().getDescription());
+        assertEquals(secondBooking.getStatus(), bookings.get(1).getStatus());
     }
 
     @Test
@@ -273,6 +380,40 @@ public class BookingServiceImplTest {
         assertEquals(2, bookings.size());
         assertEquals(firstBooking.getItem().getDescription(), bookings.get(0).getItem().getDescription());
         assertEquals(secondBooking.getStatus(), bookings.get(1).getStatus());
+    }
+
+    @Test
+    void getAllByOwner_whenUserFoundAndStateFuture_thenReturn() {
+        Booking futureBooking = new Booking(2L, LocalDateTime.of(2024, Month.MARCH, 23, 14, 12),
+                LocalDateTime.of(2024, Month.MARCH, 25, 14, 12),
+                Status.WAITING, booker, item);
+        PageImpl<Booking> bookingPage = new PageImpl<>(List.of(futureBooking));
+        when(bookingRepository.findAllByOwnerAndStateFuture(ownerId, LocalDateTime.now(),
+                PageRequest.of(0, 10, Sort.by("start").descending())))
+                .thenReturn(bookingPage);
+
+        List<Booking> bookings = bookingService.getAllByItemOwner(ownerId, State.FUTURE.toString(), 0, 10);
+
+        assertEquals(1, bookings.size());
+        assertEquals(futureBooking.getItem().getDescription(), bookings.get(0).getItem().getDescription());
+        assertEquals(futureBooking.getStatus(), bookings.get(0).getStatus());
+    }
+
+    @Test
+    void getAllByOwner_whenUserFoundAndStateCurrent_thenReturn() {
+        Booking currentBooking = new Booking(2L, LocalDateTime.of(2023, Month.MARCH, 23, 14, 12),
+                LocalDateTime.of(2024, Month.MARCH, 25, 14, 12),
+                Status.APPROVED, booker, item);
+        PageImpl<Booking> bookingPage = new PageImpl<>(List.of(currentBooking));
+        when(bookingRepository.findAllByOwnerAndStateCurrent(ownerId, LocalDateTime.now(),
+                PageRequest.of(0, 10, Sort.by("start").descending())))
+                .thenReturn(bookingPage);
+
+        List<Booking> bookings = bookingService.getAllByItemOwner(ownerId, State.CURRENT.toString(), 0, 10);
+
+        assertEquals(1, bookings.size());
+        assertEquals(currentBooking.getItem().getDescription(), bookings.get(0).getItem().getDescription());
+        assertEquals(currentBooking.getStatus(), bookings.get(0).getStatus());
     }
 
     @Test
