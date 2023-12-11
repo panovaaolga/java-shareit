@@ -35,8 +35,8 @@ public class UserServiceImplTest {
     private ArgumentCaptor<User> userArgumentCaptor;
 
     private long userId = 1L;
-    private final static String NAME = "name";
-    private final static String EMAIL = "email@mail.ru";
+    private static final String NAME = "name";
+    private static final String EMAIL = "email@mail.ru";
 
     @Test
     void getUserById_whenUserExists_thenReturnUser() {

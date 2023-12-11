@@ -77,7 +77,7 @@ public class ItemRequestServiceImplTest {
     void createRequest_whenUserNotFound_thenThrow() {
         when(userRepository.findById(userId)).thenThrow(NotFoundException.class);
 
-        assertThrows(NotFoundException.class, () ->requestService.createRequest(userId, requestDtoInput));
+        assertThrows(NotFoundException.class, () -> requestService.createRequest(userId, requestDtoInput));
     }
 
     @Test
