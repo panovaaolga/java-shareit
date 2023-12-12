@@ -40,16 +40,19 @@ public class ItemControllerTest {
 
     long userId = 1L;
     long itemId = 2L;
+    long ownerId = 2L;
     private Item item = new Item(itemId, "name", "desc", true,
-            new User(2L, "n", "email@gmail.com"), null);
+            new User(ownerId, "n", "email@gmail.com"), null);
     private ItemDto itemDto = new ItemDto(null, item.getName(), item.getDescription(), true, null);
     private ItemDtoWithDates itemDtoWithDates = ItemMapper
             .mapToItemDtoWithDates(item, null, null, List.of());
     private CommentDtoOutput commentDtoOutput = new CommentDtoOutput(1L, "text", "name", Instant.now());
 
     @Test
-    void createItem() throws Exception { //не возвращает ItemDto
-        when(itemService.save(ItemMapper.mapToItemDto(item), userId)).thenReturn(itemDto);
+    void createItem() throws Exception {
+        ItemDto expectedDto = new ItemDto(itemId, item.getName(), item.getDescription(),
+                item.getAvailable(), null);
+        when(itemService.save(itemDto, userId)).thenReturn(expectedDto);
 
         mvc.perform(post("/items")
                 .header("X-Sharer-User-Id", userId)
@@ -58,18 +61,18 @@ public class ItemControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(itemId)));
+                .andExpect(jsonPath("$.id", is(itemId), Long.class));
     }
 
     @Test
-    void updateItem() throws Exception { //не возвращает ItemDto
-        when(itemService.update(userId, itemId, ItemMapper.mapToItemDto(item))).thenReturn(new ItemDto(itemId,
-                "new name", item.getDescription(), item.getAvailable(), null));
+    void updateItem() throws Exception {
+        ItemDto expectedDto = new ItemDto(itemId, "new name", item.getDescription(),
+                item.getAvailable(), null);
+        when(itemService.update(ownerId, itemId, expectedDto)).thenReturn(expectedDto);
 
         mvc.perform(patch("/items/{itemId}", itemId)
-                .header("X-Sharer-User-Id", userId)
-                .content(mapper.writeValueAsString(new ItemDto(itemId,
-                        "new name", item.getDescription(), item.getAvailable(), null)))
+                .header("X-Sharer-User-Id", ownerId)
+                .content(mapper.writeValueAsString(expectedDto))
                 .characterEncoding(StandardCharsets.UTF_8)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))

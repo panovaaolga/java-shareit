@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -9,6 +10,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.NotFoundException;
 import ru.practicum.shareit.ValidationException;
 import ru.practicum.shareit.booking.Booking;
@@ -23,6 +26,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
@@ -76,10 +80,28 @@ public class ItemServiceImplTest {
             LocalDateTime.of(2023, Month.MARCH, 23, 14, 12),
             LocalDateTime.of(2023, Month.MARCH, 25, 14, 12),
             Status.APPROVED, booker, item);
+    ItemRequest itemRequest = new ItemRequest(1L, "request", LocalDateTime.now(), wrongAuthor);
 
     @Test
     void save() {
+        Item expectedItem = new Item(2L, item.getName(), item.getDescription(),
+                item.getAvailable(), item.getOwner(), itemRequest);
+        ItemDto expectedDto = new ItemDto(2L, "name", "text", true, itemRequest.getId());
+        when(userService.getUserById(owner.getId())).thenReturn(owner);
+        when(requestRepository.findById(itemRequest.getId())).thenReturn(Optional.of(itemRequest));
+        when(itemRepository.save(ItemMapper.mapToNewItem(expectedDto, owner, itemRequest))).thenReturn(expectedItem);
 
+        ItemDto itemDto = itemService.save(expectedDto, owner.getId());
+
+        assertEquals(itemDto.getDescription(), expectedItem.getDescription());
+    }
+
+    @Test
+    void save_whenRequestNotFound_thenThrow() {
+        ItemDto expectedDto = new ItemDto(2L, "name", "text", true, itemRequest.getId());
+        when(requestRepository.findById(itemRequest.getId())).thenThrow(NotFoundException.class);
+
+        assertThrows(NotFoundException.class, () -> itemService.save(expectedDto, owner.getId()));
     }
 
     @Test
@@ -98,6 +120,22 @@ public class ItemServiceImplTest {
 
         assertThrows(InsufficientPermissionException.class, () -> itemService
                 .update(wrongAuthor.getId(), itemId, itemDto));
+    }
+
+    @Test
+    void update_whenDataCorrect_thenReturn() {
+        Item expectedItem = new Item(itemId, item.getName(), "desc",
+                item.getAvailable(), item.getOwner(), itemRequest);
+        ItemDto expectedDto = new ItemDto(itemId, "name", "desc", true, itemRequest.getId());
+
+        when(itemRepository.findByOwnerIdAndId(owner.getId(), itemId)).thenReturn(Optional.of(item));
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        when(userService.getUserById(owner.getId())).thenReturn(owner);
+        when(itemRepository.save(ItemMapper.mapToItem(expectedDto, itemId, owner))).thenReturn(expectedItem);
+
+        ItemDto updatedItem = itemService.update(owner.getId(), itemId, expectedDto);
+
+        assertEquals(expectedItem.getDescription(), updatedItem.getDescription());
     }
 
     @Test
@@ -137,8 +175,28 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void getAllItemsByUser() {
+    void getAllItemsByUser_whenParamsInvalid_thenThrow() {
+        assertThrows(ValidationException.class, () -> itemService.getAllItemsByUser(owner.getId(), -1, 15));
+    }
 
+    @Test
+    void getAllItemsByUser_whenEmpty_thenReturnEmpty() {
+        when(itemRepository.findAllByOwnerId(owner.getId(), PageRequest.of(0, 10)))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        List<ItemDtoWithDates> items = itemService.getAllItemsByUser(owner.getId(), 0, 10);
+
+        assertEquals(0, items.size());
+    }
+
+    @Test
+    void getAllItemsByUser_whenNotEmpty_thenReturn() {
+        when(itemRepository.findAllByOwnerId(owner.getId(), PageRequest.of(0, 10)))
+                .thenReturn(new PageImpl<>(List.of(item)));
+
+        List<ItemDtoWithDates> items = itemService.getAllItemsByUser(owner.getId(), 0, 10);
+
+        assertEquals(1, items.size());
     }
 
     @Test

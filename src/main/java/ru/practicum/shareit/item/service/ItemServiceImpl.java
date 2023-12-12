@@ -98,7 +98,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDtoWithDates> getAllItemsByUser(long userId, int from, int size) {
         List<ItemDtoWithDates> itemsDto = new ArrayList<>();
-        if (from < 0 && size <= 0) {
+        if (from < 0 || size <= 0) {
             throw new ValidationException("Params with requested values are not allowed");
         }
         Page<Item> items = itemRepository.findAllByOwnerId(userId, PageRequest.of(from / size, size));
@@ -170,7 +170,6 @@ public class ItemServiceImpl implements ItemService {
                 return true;
             }
         }
-        log.info("here");
         bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(authorId, LocalDateTime.now(),
                 LocalDateTime.now());
         for (Booking b : bookings) {

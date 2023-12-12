@@ -40,9 +40,10 @@ public class BookingControllerTest {
     long bookerId = 1L;
     long bookingId = 0L;
     long itemId = 2L;
+    long ownerId = 2L;
     private User booker = new User(bookerId, "name", "email@gmail.com");
     private Item item = new Item(itemId, "name", "desc", true,
-            new User(2L, "n", "email@gmail.com"), null);
+            new User(ownerId, "n", "email@gmail.com"), null);
     private BookingDto bookingDto = new BookingDto(itemId,
             LocalDateTime.of(2024, Month.MARCH, 23, 14, 12),
             LocalDateTime.of(2024, Month.MARCH, 25, 14, 12));
@@ -67,19 +68,19 @@ public class BookingControllerTest {
     }
 
     @Test
-    void approveBooking() throws Exception { //переписать
+    void approveBooking() throws Exception {
         expectedBooking.setStatus(Status.APPROVED);
-        when(bookingService.approveBooking(2L, bookingId, true)).thenReturn(expectedBooking);
+        when(bookingService.approveBooking(ownerId, bookingId, true)).thenReturn(expectedBooking);
 
         mvc.perform(patch("/bookings/{bookingId}", bookingId)
-                .header("X-Sharer-User-Id", bookerId)
+                .header("X-Sharer-User-Id", ownerId)
                 .characterEncoding(StandardCharsets.UTF_8)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .param("approved", String.valueOf(true)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(expectedBooking.getId()), Long.class))
-                .andExpect(jsonPath("$.status", is(Status.APPROVED)));
+                .andExpect(jsonPath("$.status", is(Status.APPROVED.toString())));
     }
 
     @Test
