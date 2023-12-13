@@ -260,10 +260,9 @@ public class ItemServiceImplTest {
         when(userRepository.findById(booker.getId())).thenReturn(Optional.of(booker));
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(itemRepository.findByItemIdWithComments(itemId)).thenReturn(Optional.of(item));
-        when(bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(booker.getId(),
-                LocalDateTime.now())).thenReturn(List.of(pastBooking));
-        when(commentRepository.save(CommentMapper.mapToNewComment(commentDtoInput, booker, item)))
-                .thenReturn(comment);
+        when(bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(anyLong(),
+                any())).thenReturn(List.of(pastBooking));
+        when(commentRepository.save(any())).thenReturn(comment);
 
         CommentDtoOutput commentDtoOutput = itemService.addComment(commentDtoInput, booker.getId(), itemId);
 

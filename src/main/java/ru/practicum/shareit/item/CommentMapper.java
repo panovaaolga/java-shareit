@@ -12,7 +12,6 @@ import java.util.List;
 public class CommentMapper {
 
     public static CommentDtoOutput mapToCommentOutput(Comment comment) {
-        System.out.println(comment);
         CommentDtoOutput commentDtoOutput = new CommentDtoOutput();
         commentDtoOutput.setId(comment.getId());
         commentDtoOutput.setText(comment.getText());
