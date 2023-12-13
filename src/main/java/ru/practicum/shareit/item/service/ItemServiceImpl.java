@@ -1,7 +1,6 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -24,8 +23,9 @@ import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.item.InsufficientPermissionException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.ValidationException;
-import ru.practicum.shareit.user.service.UserServiceImpl;
+import ru.practicum.shareit.user.repository.UserRepository;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -33,17 +33,17 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-@Slf4j
 public class ItemServiceImpl implements ItemService {
-    private final UserServiceImpl userService;
+    private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
     private final RequestRepository requestRepository;
 
     @Override
+    @Transactional
     public ItemDto save(ItemDto itemDto, long userId) throws NotFoundException {
-        User user = userService.getUserById(userId);
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(User.class.getName()));
         Item item;
         if (itemDto.getRequestId() != null) {
             ItemRequest itemRequest = requestRepository.findById(itemDto.getRequestId()).orElseThrow(() ->
@@ -56,11 +56,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDto update(long userId, long itemId, ItemDto itemDto) throws NotFoundException,
             InsufficientPermissionException {
         if (isOwner(userId, itemId)) {
             Item itemBefore = itemRepository.findByOwnerIdAndId(userId, itemId).get();
-            itemBefore.setOwner(userService.getUserById(userId));
             if (itemDto.getName() != null) {
                 itemBefore.setName(itemDto.getName());
             }
@@ -141,7 +141,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public CommentDtoOutput addComment(CommentDtoInput commentDtoInput, long authorId, long itemId)
             throws NotFoundException, ValidationException {
-        User author = userService.getUserById(authorId);
+        User author = userRepository.findById(authorId).orElseThrow(() -> new NotFoundException(User.class.getName()));
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException(Item.class.getName()));
         if (isPastBooker(authorId, itemId)) {
             return CommentMapper.mapToCommentOutput(commentRepository

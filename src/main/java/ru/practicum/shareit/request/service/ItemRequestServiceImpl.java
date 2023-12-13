@@ -31,8 +31,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public ItemRequestDto createRequest(long authorId, ItemRequestDtoInput dtoInput) {
         User author = userRepository.findById(authorId).orElseThrow(() -> new NotFoundException(User.class.getName()));
-        return RequestMapper.mapToRequestDtoOutput(requestRepository
-                .save(RequestMapper.mapToItemRequest(dtoInput, author)), new ArrayList<>());
+        ItemRequest itemRequest = requestRepository.save(RequestMapper.mapToItemRequest(dtoInput, author));
+        return RequestMapper.mapToRequestDtoOutput(itemRequest, new ArrayList<>());
     }
 
     @Override

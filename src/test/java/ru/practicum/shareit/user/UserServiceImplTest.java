@@ -169,7 +169,7 @@ public class UserServiceImplTest {
     void createUser_whenNameValid_thenReturn() {
         User expectedUser = new User(userId, NAME, EMAIL);
         UserDto userDto = new UserDto(NAME, EMAIL);
-        when(userRepository.save(UserMapper.mapToUser(userDto))).thenReturn(expectedUser);
+        when(userRepository.save(any())).thenReturn(expectedUser);
 
         User savedUser = userService.save(userDto);
 

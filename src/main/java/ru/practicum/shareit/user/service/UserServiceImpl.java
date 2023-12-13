@@ -20,7 +20,6 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public User save(UserDto userDto) {
-
         return userRepository.save(UserMapper.mapToUser(userDto));
     }
 
