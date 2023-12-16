@@ -83,6 +83,13 @@ public class ItemServiceImplTest {
     ItemRequest itemRequest = new ItemRequest(1L, "request", LocalDateTime.now(), wrongAuthor);
 
     @Test
+    void getItem_whenNotFound_thenThrow() {
+        when(itemRepository.findById(itemId)).thenThrow(NotFoundException.class);
+
+        assertThrows(NotFoundException.class, () -> itemService.getItem(itemId));
+    }
+
+    @Test
     void save_whenCorrect_thenReturn() {
         Item expectedItem = new Item(2L, item.getName(), item.getDescription(),
                 item.getAvailable(), item.getOwner(), itemRequest);
@@ -219,10 +226,12 @@ public class ItemServiceImplTest {
     void getAllItemsByUser_whenNotEmptyWithBooking_thenReturn() {
         when(itemRepository.findAllByOwnerId(owner.getId(), PageRequest.of(0, 10)))
                 .thenReturn(new PageImpl<>(List.of(item)));
+        when(bookingRepository.findLastBooking(anyLong(), any())).thenReturn(List.of(booking));
 
         List<ItemDtoWithDates> items = itemService.getAllItemsByUser(owner.getId(), 0, 10);
 
         assertEquals(1, items.size());
+        assertEquals(booking.getId(), items.get(0).getLastBooking().getId());
     }
 
     @Test
