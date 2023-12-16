@@ -36,7 +36,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public ItemRequestDto getRequestById(long userId, long requestId) {
-        if(userService.getUserById(userId) != null) {
+        if (userService.getUserById(userId) != null) {
             ItemRequest itemRequest = requestRepository.findById(requestId)
                     .orElseThrow(() -> new NotFoundException(ItemRequest.class.getName()));
             List<ItemDto> itemDtoList = itemService.getRequestedItems(requestId);
