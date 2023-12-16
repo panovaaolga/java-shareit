@@ -226,12 +226,24 @@ public class ItemServiceImplTest {
     void getAllItemsByUser_whenNotEmptyWithBooking_thenReturn() {
         when(itemRepository.findAllByOwnerId(owner.getId(), PageRequest.of(0, 10)))
                 .thenReturn(new PageImpl<>(List.of(item)));
-        when(bookingRepository.findLastBooking(anyLong(), any())).thenReturn(List.of(booking));
+        when(bookingRepository.findNextBooking(anyLong(), any())).thenReturn(List.of(booking));
+        when(bookingRepository.findLastBooking(anyLong(), any())).thenReturn(List.of(pastBooking));
+
 
         List<ItemDtoWithDates> items = itemService.getAllItemsByUser(owner.getId(), 0, 10);
 
         assertEquals(1, items.size());
-        assertEquals(booking.getId(), items.get(0).getLastBooking().getId());
+        assertEquals(2L, items.get(0).getLastBooking().getId());
+        assertEquals(1L, items.get(0).getNextBooking().getId());
+    }
+
+    @Test
+    void getRequestedItems_whenItemsFound_thenReturn() {
+        when(itemRepository.findByRequestIdOrderByCreated(anyLong())).thenReturn(List.of());
+
+        List<ItemDto> itemDtoList = itemService.getRequestedItems(anyLong());
+
+        assertEquals(0, itemDtoList.size());
     }
 
     @Test

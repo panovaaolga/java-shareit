@@ -54,25 +54,6 @@ public class ItemMapper {
         return item;
     }
 
-    public static Item mapToExistingItem(ItemDto itemDto, long itemId) {
-        Item item = new Item();
-        item.setId(itemId);
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
-        item.setAvailable(itemDto.getAvailable());
-        return item;
-    }
-
-    public static Item mapToItem(ItemDto itemDto, long itemId, User user) {
-        Item item = new Item();
-        item.setId(itemId);
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
-        item.setAvailable(itemDto.getAvailable());
-        item.setOwner(user);
-        return item;
-    }
-
     public static ItemDtoWithDates mapToItemDtoWithDates(Item item, BookingDtoOutput lastBooking,
                                                          BookingDtoOutput nextBooking,
                                                          List<CommentDtoOutput> comments) {
