@@ -21,6 +21,8 @@ public interface ItemService {
 
     Item getItem(long itemId);
 
+    List<ItemDto> getRequestedItems(long requestId);
+
     List<ItemDto> getSearchedItems(String text);
 
     CommentDtoOutput addComment(CommentDtoInput commentDtoInput, long authorId, long itemId) throws NotFoundException, ValidationException;

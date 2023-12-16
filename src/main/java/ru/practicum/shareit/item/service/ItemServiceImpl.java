@@ -77,6 +77,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    public List<ItemDto> getRequestedItems(long requestId) {
+        return ItemMapper.mapToItemDtoList(itemRepository.findByRequestIdOrderByCreated(requestId));
+    }
+
+    @Override
     public ItemDtoWithDates getItem(long itemId, long userId) throws NotFoundException {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException(Item.class.getName()));
         BookingDtoOutput lastBooking = null;
