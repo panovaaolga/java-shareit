@@ -11,10 +11,10 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.ValidationException;
-import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,14 +25,13 @@ import java.util.Locale;
 @Slf4j
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
-    private final UserRepository userRepository;
-    private final ItemRepository itemRepository;
+    private final UserService userService;
+    private final ItemService itemService;
 
     @Override
-    public Booking createBooking(BookingDto bookingDto, long bookerId) throws NotFoundException, ValidationException {
-        User user = userRepository.findById(bookerId).orElseThrow(() -> new NotFoundException(User.class.getName()));
-        Item item = itemRepository.findById(bookingDto.getItemId())
-                .orElseThrow(() -> new NotFoundException(Item.class.getName()));
+    public Booking createBooking(BookingDto bookingDto, long bookerId) {
+        User user = userService.getUserById(bookerId);
+        Item item = itemService.getItem(bookingDto.getItemId());
         if (item.getOwner().getId() == bookerId) {
             throw new NotFoundException(Item.class.getName());
         }
@@ -48,8 +47,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking approveBooking(long ownerId, long bookingId, boolean approved) throws NotFoundException,
-            ValidationException {
+    public Booking approveBooking(long ownerId, long bookingId, boolean approved) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException(Booking.class.getName()));
         if (booking.getItem().getOwner().getId() == ownerId) {
@@ -67,7 +65,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking getBookingById(long bookingId, long userId) throws NotFoundException {
+    public Booking getBookingById(long bookingId, long userId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException(Booking.class.getName()));
         if (booking.getBooker().getId() == userId || booking.getItem().getOwner().getId() == userId) {
@@ -78,9 +76,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Booking> getAllByBooker(long userId, String state, int from, int size) throws UnsupportedStateException,
-            NotFoundException {
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundException(User.class.getName()));
+    public List<Booking> getAllByBooker(long userId, String state, int from, int size) {
+        userService.getUserById(userId);
         if (from >= 0 && size > 0) {
             switch (state.toUpperCase(Locale.ROOT)) {
                 case "WAITING":
@@ -111,9 +108,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Booking> getAllByItemOwner(long ownerId, String state, int from, int size) throws UnsupportedStateException,
-            NotFoundException {
-        userRepository.findById(ownerId).orElseThrow(() -> new NotFoundException(User.class.getName()));
+    public List<Booking> getAllByItemOwner(long ownerId, String state, int from, int size) {
+        userService.getUserById(ownerId);
         if (from >= 0 && size > 0) {
             switch (state.toUpperCase(Locale.ROOT)) {
                 case "ALL":

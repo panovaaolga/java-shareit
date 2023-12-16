@@ -96,6 +96,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    public Item getItem(long itemId) {
+        return itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException(Item.class.getName()));
+    }
+
+    @Override
     public List<ItemDtoWithDates> getAllItemsByUser(long userId, int from, int size) {
         List<ItemDtoWithDates> itemsDto = new ArrayList<>();
         if (from < 0 || size <= 0) {

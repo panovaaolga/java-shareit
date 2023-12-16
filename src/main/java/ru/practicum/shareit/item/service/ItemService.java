@@ -7,6 +7,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithDates;
 import ru.practicum.shareit.item.InsufficientPermissionException;
 import ru.practicum.shareit.ValidationException;
+import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
 
@@ -17,6 +18,8 @@ public interface ItemService {
     List<ItemDtoWithDates> getAllItemsByUser(long userId, int from, int size);
 
     void deleteItem(long userId, long itemId);
+
+    Item getItem(long itemId);
 
     List<ItemDto> getSearchedItems(String text);
 

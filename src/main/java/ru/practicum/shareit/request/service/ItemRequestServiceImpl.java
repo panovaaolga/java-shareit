@@ -8,6 +8,7 @@ import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.request.RequestMapper;
 import ru.practicum.shareit.request.RequestRepository;
@@ -16,6 +17,7 @@ import ru.practicum.shareit.request.dto.ItemRequestDtoInput;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.ValidationException;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +29,13 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final RequestRepository requestRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
+    private final ItemService itemService;
 
     @Override
     public ItemRequestDto createRequest(long authorId, ItemRequestDtoInput dtoInput) {
-        User author = userRepository.findById(authorId).orElseThrow(() -> new NotFoundException(User.class.getName()));
+       // User author = userRepository.findById(authorId).orElseThrow(() -> new NotFoundException(User.class.getName()));
+        User author = userService.getUserById(authorId);
         ItemRequest itemRequest = requestRepository.save(RequestMapper.mapToItemRequest(dtoInput, author));
         return RequestMapper.mapToRequestDtoOutput(itemRequest, new ArrayList<>());
     }
