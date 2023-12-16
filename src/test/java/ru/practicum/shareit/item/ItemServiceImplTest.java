@@ -28,7 +28,7 @@ import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -43,7 +43,7 @@ import static org.mockito.Mockito.*;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class ItemServiceImplTest {
     @Mock
-    UserRepository userRepository;
+    UserService userService;
 
     @Mock
     CommentRepository commentRepository;
@@ -87,7 +87,7 @@ public class ItemServiceImplTest {
         Item expectedItem = new Item(2L, item.getName(), item.getDescription(),
                 item.getAvailable(), item.getOwner(), itemRequest);
         ItemDto expectedDto = new ItemDto(2L, "name", "text", true, itemRequest.getId());
-        when(userRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
+        when(userService.getUserById(owner.getId())).thenReturn(owner);
         when(requestRepository.findById(itemRequest.getId())).thenReturn(Optional.of(itemRequest));
         when(itemRepository.save(any())).thenReturn(expectedItem);
 
@@ -108,7 +108,7 @@ public class ItemServiceImplTest {
     void save_whenRequestEmpty_thenReturn() {
         ItemDto expectedDto = new ItemDto(2L, "name", "text", true, null);
         Item expectedItem = new Item(2L, "name", "text", true, owner, null);
-        when(userRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
+        when(userService.getUserById(owner.getId())).thenReturn(owner);
         when(itemRepository.save(any())).thenReturn(expectedItem);
 
         itemService.save(expectedDto, owner.getId());
@@ -146,7 +146,7 @@ public class ItemServiceImplTest {
 
         when(itemRepository.findByOwnerIdAndId(owner.getId(), itemId)).thenReturn(Optional.of(itemBefore));
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(itemBefore));
-        when(userRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
+        when(userService.getUserById(owner.getId())).thenReturn(owner);
         when(itemRepository.save(itemBefore)).thenReturn(expectedItem);
 
         itemService.update(owner.getId(), itemId, expectedDto);
@@ -257,7 +257,7 @@ public class ItemServiceImplTest {
 
     @Test
     void addComment_whenAuthorCorrectPast_thenReturn() {
-        when(userRepository.findById(booker.getId())).thenReturn(Optional.of(booker));
+        when(userService.getUserById(booker.getId())).thenReturn(booker);
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(itemRepository.findByItemIdWithComments(itemId)).thenReturn(Optional.of(item));
         when(bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(anyLong(),
@@ -275,7 +275,7 @@ public class ItemServiceImplTest {
                 LocalDateTime.of(2023, Month.MARCH, 23, 14, 12),
                 LocalDateTime.of(2024, Month.MARCH, 25, 14, 12),
                 Status.WAITING, booker, item);
-        when(userRepository.findById(booker.getId())).thenReturn(Optional.of(booker));
+        when(userService.getUserById(booker.getId())).thenReturn(booker);
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(commentRepository.save(any())).thenReturn(comment);
         when(itemRepository.findByItemIdWithComments(itemId)).thenReturn(Optional.of(item));
@@ -291,7 +291,7 @@ public class ItemServiceImplTest {
 
     @Test
     void addComment_whenBookingNotExists_thenThrow() {
-        when(userRepository.findById(booker.getId())).thenReturn(Optional.of(booker));
+        when(userService.getUserById(booker.getId())).thenReturn(booker);
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(itemRepository.findByItemIdWithComments(itemId)).thenReturn(Optional.empty());
 
@@ -301,7 +301,7 @@ public class ItemServiceImplTest {
 
     @Test
     void addComment_whenAuthorNotBooker_thenThrow() {
-        when(userRepository.findById(wrongAuthor.getId())).thenReturn(Optional.of(wrongAuthor));
+        when(userService.getUserById(wrongAuthor.getId())).thenReturn(wrongAuthor);
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(itemRepository.findByItemIdWithComments(itemId)).thenReturn(Optional.of(item));
         when(bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(anyLong(),

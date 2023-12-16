@@ -15,12 +15,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.NotFoundException;
 import ru.practicum.shareit.ValidationException;
-import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestDtoInput;
 import ru.practicum.shareit.request.service.ItemRequestServiceImpl;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,10 +40,10 @@ public class ItemRequestServiceImplTest {
     RequestRepository requestRepository;
 
     @Mock
-    UserRepository userRepository;
+    UserService userService;
 
     @Mock
-    ItemRepository itemRepository;
+    ItemService itemService;
 
     @InjectMocks
     ItemRequestServiceImpl requestService;
@@ -64,7 +64,7 @@ public class ItemRequestServiceImplTest {
 
     @Test
     void createRequest_whenDataCorrect_thenReturn() {
-        when(userRepository.findById(authorId)).thenReturn(Optional.of(author));
+        when(userService.getUserById(authorId)).thenReturn(author);
         when(requestRepository.save(any())).thenReturn(expectedRequest);
 
         ItemRequestDto savedItemRequest = requestService.createRequest(authorId, requestDtoInput);
@@ -74,16 +74,16 @@ public class ItemRequestServiceImplTest {
 
     @Test
     void createRequest_whenUserNotFound_thenThrow() {
-        when(userRepository.findById(authorId)).thenThrow(NotFoundException.class);
+        when(userService.getUserById(authorId)).thenThrow(NotFoundException.class);
 
         assertThrows(NotFoundException.class, () -> requestService.createRequest(authorId, requestDtoInput));
     }
 
     @Test
     void getRequestById_whenRequestFound_thenReturn() {
-        when(userRepository.findById(authorId)).thenReturn(Optional.of(new User()));
+        when(userService.getUserById(authorId)).thenReturn(new User());
         when(requestRepository.findById(requestId)).thenReturn(Optional.of(expectedRequest));
-        when(itemRepository.findByRequestIdOrderByCreated(requestId)).thenReturn(List.of());
+        when(itemService.getRequestedItems(requestId)).thenReturn(List.of());
 
         ItemRequestDto actualRequest = requestService.getRequestById(authorId, requestId);
 
@@ -94,7 +94,7 @@ public class ItemRequestServiceImplTest {
 
     @Test
     void getRequestById_whenRequestNotFound_thenThrow() {
-        when(userRepository.findById(authorId)).thenReturn(Optional.of(new User()));
+        when(userService.getUserById(authorId)).thenReturn(new User());
         when(requestRepository.findById(requestId)).thenThrow(NotFoundException.class);
 
         assertThrows(NotFoundException.class, () -> requestService.getRequestById(authorId, requestId));
@@ -102,14 +102,14 @@ public class ItemRequestServiceImplTest {
 
     @Test
     void getRequestById_whenUserNotFound_thenThrow() {
-        when(userRepository.findById(authorId)).thenReturn(Optional.empty());
+        when(userService.getUserById(authorId)).thenReturn(null);
 
         assertThrows(NotFoundException.class, () -> requestService.getRequestById(authorId, requestId));
     }
 
     @Test
     void getRequestsByOwner_whenListEmpty_thenReturnEmpty() {
-        when(userRepository.findById(authorId)).thenReturn(Optional.of(new User()));
+        when(userService.getUserById(authorId)).thenReturn(new User());
         when(requestRepository.findAllByAuthorIdOrderByCreatedDesc(authorId)).thenReturn(List.of());
 
         assertEquals(0, requestService.getRequestsByOwner(authorId).size());
@@ -117,14 +117,14 @@ public class ItemRequestServiceImplTest {
 
     @Test
     void getRequestsByOwner_whenUserNotFound_thenThrow() {
-        when(userRepository.findById(authorId)).thenReturn(Optional.empty());
+        when(userService.getUserById(authorId)).thenThrow(NotFoundException.class);
 
         assertThrows(NotFoundException.class, () -> requestService.getRequestsByOwner(authorId));
     }
 
     @Test
     void getRequestsByOwner_whenListNotEmpty_thenReturnList() {
-        when(userRepository.findById(authorId)).thenReturn(Optional.of(new User()));
+        when(userService.getUserById(authorId)).thenReturn(new User());
         when(requestRepository.findAllByAuthorIdOrderByCreatedDesc(authorId))
                 .thenReturn(List.of(expectedRequest, secondExpectedRequest));
 
@@ -136,7 +136,7 @@ public class ItemRequestServiceImplTest {
 
     @Test
     void getAllRequests_whenArgsCorrect_thenReturn() {
-        when(userRepository.findById(authorId)).thenReturn(Optional.of(new User()));
+        when(userService.getUserById(authorId)).thenReturn(new User());
         when(requestRepository.findAllByAuthorIdNot(authorId,
                 PageRequest.of(0, 10, Sort.by("created").descending()))).thenReturn(Page.empty());
 
@@ -145,7 +145,7 @@ public class ItemRequestServiceImplTest {
 
     @Test
     void getAllRequests_whenArgsNotCorrect_thenThrow() {
-        when(userRepository.findById(authorId)).thenReturn(Optional.of(new User()));
+        when(userService.getUserById(authorId)).thenReturn(new User());
         when(requestRepository.findAllByAuthorIdNot(anyLong(), any()))
                 .thenThrow(ValidationException.class);
 
@@ -155,7 +155,7 @@ public class ItemRequestServiceImplTest {
     @Test
     void getAllRequests_whenArgsCorrectNotEmpty_thenReturn() {
         PageImpl<ItemRequest> itemRequests = new PageImpl<>(List.of(expectedRequest, secondExpectedRequest));
-        when(userRepository.findById(authorId)).thenReturn(Optional.of(new User()));
+        when(userService.getUserById(authorId)).thenReturn(new User());
         when(requestRepository.findAllByAuthorIdNot(authorId,
                 PageRequest.of(0, 10, Sort.by("created").descending())))
                 .thenReturn(itemRequests);
@@ -166,7 +166,7 @@ public class ItemRequestServiceImplTest {
 
     @Test
     void getAllRequests_whenUserNotFound_thenThrow() {
-        when(userRepository.findById(authorId)).thenReturn(Optional.empty());
+        when(userService.getUserById(authorId)).thenThrow(NotFoundException.class);
 
         assertThrows(NotFoundException.class, () -> requestService.getAllRequests(authorId, 0, 10));
     }
