@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.ValidationGroups;
 
 import javax.validation.constraints.*;
@@ -9,6 +11,8 @@ import javax.validation.constraints.*;
  * TODO Sprint add-controllers.
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ItemDto {
     @Null(groups = {ValidationGroups.Create.class})
     private Long id;
@@ -20,4 +24,5 @@ public class ItemDto {
     private String description;
     @NotNull(groups = {ValidationGroups.Create.class})
     private Boolean available;
+    private Long requestId;
 }

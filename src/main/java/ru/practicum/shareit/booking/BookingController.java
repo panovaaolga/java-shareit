@@ -5,8 +5,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.item.NotFoundException;
-import ru.practicum.shareit.user.ValidationException;
 
 import java.util.List;
 
@@ -22,33 +20,36 @@ public class BookingController {
 
     @PostMapping
     public Booking create(@RequestHeader("X-Sharer-User-Id") long bookerId,
-                                   @Validated @RequestBody BookingDto bookingDto) throws NotFoundException, ValidationException {
+                                   @Validated @RequestBody BookingDto bookingDto) {
         return bookingService.createBooking(bookingDto, bookerId);
     }
 
     @PatchMapping("/{bookingId}")
     public Booking approve(@RequestHeader("X-Sharer-User-Id") long ownerId,
                               @PathVariable long bookingId,
-                              @RequestParam boolean approved) throws NotFoundException, ValidationException {
+                              @RequestParam boolean approved) {
         return bookingService.approveBooking(ownerId, bookingId, approved);
     }
 
     @GetMapping("/{bookingId}")
     public Booking getBooking(@RequestHeader("X-Sharer-User-Id") long userId,
-                                 @PathVariable long bookingId) throws NotFoundException {
+                                 @PathVariable long bookingId) {
         return bookingService.getBookingById(bookingId, userId);
     }
 
     @GetMapping
     public List<Booking> getAllByUser(@RequestHeader("X-Sharer-User-Id") long userId,
-                                         @RequestParam(defaultValue = "ALL") String state)
-            throws UnsupportedStateException, NotFoundException {
-        return bookingService.getAllByBooker(userId, state);
+                                      @RequestParam(defaultValue = "ALL") String state,
+                                      @RequestParam(defaultValue = "0") int from,
+                                      @RequestParam(defaultValue = "10") int size) {
+        return bookingService.getAllByBooker(userId, state, from, size);
     }
 
     @GetMapping("/owner")
     public List<Booking> getAllByOwner(@RequestHeader("X-Sharer-User-Id") long userId,
-                                          @RequestParam(defaultValue = "ALL") String state) throws UnsupportedStateException, NotFoundException {
-        return bookingService.getAllByItemOwner(userId, state);
+                                       @RequestParam(defaultValue = "ALL") String state,
+                                       @RequestParam(defaultValue = "0") int from,
+                                       @RequestParam(defaultValue = "10") int size) {
+        return bookingService.getAllByItemOwner(userId, state, from, size);
     }
 }

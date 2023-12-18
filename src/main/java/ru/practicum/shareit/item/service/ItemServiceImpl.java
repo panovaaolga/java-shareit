@@ -1,7 +1,8 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
@@ -9,21 +10,22 @@ import ru.practicum.shareit.booking.dto.BookingDtoOutput;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.CommentMapper;
 import ru.practicum.shareit.item.ItemMapper;
-import ru.practicum.shareit.item.NotFoundException;
-import ru.practicum.shareit.item.dao.ItemDao;
+import ru.practicum.shareit.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDtoInput;
 import ru.practicum.shareit.item.dto.CommentDtoOutput;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithDates;
-import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.InsufficientPermissionException;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.RequestRepository;
+import ru.practicum.shareit.item.InsufficientPermissionException;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.ValidationException;
-import ru.practicum.shareit.user.service.UserServiceImpl;
+import ru.practicum.shareit.ValidationException;
+import ru.practicum.shareit.user.service.UserService;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -31,51 +33,33 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-@Slf4j
 public class ItemServiceImpl implements ItemService {
-    private final ItemDao itemDao;
-    private final UserServiceImpl userService;
+    private final UserService userService;
     private final CommentRepository commentRepository;
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
+    private final RequestRepository requestRepository;
 
     @Override
-    public ItemDto createItem(ItemDto itemDto, long userId) throws NotFoundException {
+    @Transactional
+    public ItemDto save(ItemDto itemDto, long userId) {
         User user = userService.getUserById(userId);
-        Item item = ItemMapper.mapToNewItem(itemDto, user);
-        itemDao.saveItem(userId, item);
-        return ItemMapper.mapToItemDto(item);
-    }
-
-    @Override
-    public ItemDto save(ItemDto itemDto, long userId) throws NotFoundException {
-        User user = userService.getUserById(userId);
-        Item item = ItemMapper.mapToNewItem(itemDto, user);
+        Item item;
+        if (itemDto.getRequestId() != null) {
+            ItemRequest itemRequest = requestRepository.findById(itemDto.getRequestId()).orElseThrow(() ->
+                    new NotFoundException(ItemRequest.class.getName()));
+            item = ItemMapper.mapToNewItem(itemDto, user, itemRequest);
+            return ItemMapper.mapToItemDto(itemRepository.save(item));
+        }
+        item = ItemMapper.mapToNewItem(itemDto, user);
         return ItemMapper.mapToItemDto(itemRepository.save(item));
     }
 
     @Override
-    public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) throws ValidationException {
-        Item itemBefore = ItemMapper.mapToExistingItem(itemDto, itemId);
-        log.info("itemBefore: {}", itemBefore);
-        if (itemBefore.getName() == null) {
-            itemBefore.setName(itemDao.getItemById(itemId).getName());
-        }
-        if (itemBefore.getDescription() == null) {
-            itemBefore.setDescription(itemDao.getItemById(itemId).getDescription());
-        }
-        if (itemBefore.getAvailable() == null) {
-            itemBefore.setAvailable(itemDao.getItemById(itemId).getAvailable());
-        }
-        return ItemMapper.mapToItemDto(itemDao.updateItem(userId, itemBefore));
-    }
-
-    @Override
-    public ItemDto update(long userId, long itemId, ItemDto itemDto) throws NotFoundException,
-            InsufficientPermissionException {
+    @Transactional
+    public ItemDto update(long userId, long itemId, ItemDto itemDto) {
         if (isOwner(userId, itemId)) {
             Item itemBefore = itemRepository.findByOwnerIdAndId(userId, itemId).get();
-            itemBefore.setOwner(userService.getUserById(userId));
             if (itemDto.getName() != null) {
                 itemBefore.setName(itemDto.getName());
             }
@@ -92,39 +76,55 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDtoWithDates getItem(long itemId, long userId) throws NotFoundException {
+    public List<ItemDto> getRequestedItems(long requestId) {
+        return ItemMapper.mapToItemDtoList(itemRepository.findByRequestIdOrderByCreated(requestId));
+    }
+
+    @Override
+    public ItemDtoWithDates getItem(long itemId, long userId) {
+        LocalDateTime now = LocalDateTime.now();
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException(Item.class.getName()));
         BookingDtoOutput lastBooking = null;
         BookingDtoOutput nextBooking = null;
         List<CommentDtoOutput> comments = CommentMapper.mapToListDto(commentRepository.findByItemId(itemId));
         if (itemRepository.findByOwnerIdAndId(userId, itemId).isPresent()) {
-            if (!bookingRepository.findLastBooking(itemId, LocalDateTime.now()).isEmpty()) {
-                lastBooking = BookingMapper.mapToBookingDtoOutput(bookingRepository
-                        .findLastBooking(itemId, LocalDateTime.now()).get(0));
+            if (!bookingRepository.findLastBooking(itemId, now).isEmpty()) {
+                lastBooking = BookingMapper.mapToBookingDtoOutput(bookingRepository.findLastBooking(itemId, now).get(0));
             }
-            if (!bookingRepository.findNextBooking(itemId, LocalDateTime.now()).isEmpty()) {
-                nextBooking = BookingMapper.mapToBookingDtoOutput(bookingRepository
-                        .findNextBooking(itemId, LocalDateTime.now()).get(0));
+            if (!bookingRepository.findNextBooking(itemId, now).isEmpty()) {
+                nextBooking = BookingMapper.mapToBookingDtoOutput(bookingRepository.findNextBooking(itemId, now).get(0));
             }
         }
         return ItemMapper.mapToItemDtoWithDates(item, lastBooking, nextBooking, comments);
     }
 
     @Override
-    public List<ItemDtoWithDates> getAllItemsByUser(long userId) {
+    public Item getItem(long itemId) {
+        return itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException(Item.class.getName()));
+    }
+
+    @Override
+    public List<ItemDtoWithDates> getAllItemsByUser(long userId, int from, int size) {
+        LocalDateTime now = LocalDateTime.now();
         List<ItemDtoWithDates> itemsDto = new ArrayList<>();
-        List<Item> items = itemRepository.findAllByOwnerId(userId);
+        if (from < 0 || size <= 0) {
+            throw new ValidationException("Params with requested values are not allowed");
+        }
+        Page<Item> items = itemRepository.findAllByOwnerId(userId, PageRequest.of(from / size, size));
         BookingDtoOutput lastBooking = null;
         BookingDtoOutput nextBooking = null;
-        for (Item i : items) {
+        if (items.isEmpty()) {
+            return new ArrayList<>();
+        }
+        for (Item i : items.getContent()) {
             List<CommentDtoOutput> comments = CommentMapper.mapToListDto(commentRepository.findByItemId(i.getId()));
-            if (!bookingRepository.findLastBooking(i.getId(), LocalDateTime.now()).isEmpty()) {
-                lastBooking = BookingMapper.mapToBookingDtoOutput(bookingRepository
-                        .findLastBooking(i.getId(), LocalDateTime.now()).get(0));
+            if (!bookingRepository.findLastBooking(i.getId(), now).isEmpty()) {
+                lastBooking = BookingMapper.mapToBookingDtoOutput(bookingRepository.findLastBooking(i.getId(), now)
+                        .get(0));
             }
-            if (!bookingRepository.findNextBooking(i.getId(), LocalDateTime.now()).isEmpty()) {
-                nextBooking = BookingMapper.mapToBookingDtoOutput(bookingRepository
-                        .findNextBooking(i.getId(), LocalDateTime.now()).get(0));
+            if (!bookingRepository.findNextBooking(i.getId(), now).isEmpty()) {
+                nextBooking = BookingMapper.mapToBookingDtoOutput(bookingRepository.findNextBooking(i.getId(), now)
+                        .get(0));
             }
             itemsDto.add(ItemMapper.mapToItemDtoWithDates(i, lastBooking, nextBooking, comments));
             lastBooking = null;
@@ -143,26 +143,23 @@ public class ItemServiceImpl implements ItemService {
         if (text.isEmpty()) {
             return new ArrayList<>();
         }
-        log.info("Searched items: {}", itemRepository.findByNameOrDescriptionContainingIgnoreCaseAndAvailableTrue(text,
-                text));
         return ItemMapper.mapToItemDtoList(itemRepository
                 .findByNameOrDescriptionContainingIgnoreCaseAndAvailableTrue(text, text));
     }
 
     @Override
-    public CommentDtoOutput addComment(CommentDtoInput commentDtoInput, long authorId, long itemId)
-            throws NotFoundException, ValidationException {
+    public CommentDtoOutput addComment(CommentDtoInput commentDtoInput, long authorId, long itemId) {
         User author = userService.getUserById(authorId);
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException(Item.class.getName()));
         if (isPastBooker(authorId, itemId)) {
-            Comment comment = CommentMapper.mapToNewComment(commentDtoInput, author, item);
-            return CommentMapper.mapToCommentOutput(commentRepository.save(comment));
+            return CommentMapper.mapToCommentOutput(commentRepository
+                    .save(CommentMapper.mapToNewComment(commentDtoInput, author, item)));
         } else {
             throw new ValidationException("You did not book this item");
         }
     }
 
-    private boolean isOwner(long userId, long itemId) throws NotFoundException {
+    private boolean isOwner(long userId, long itemId) {
         if (itemRepository.findByOwnerIdAndId(userId, itemId).isPresent()) {
             return itemRepository.findById(itemId).get().getOwner().getId() == (userId);
         } else {
@@ -170,19 +167,19 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    private boolean isPastBooker(long authorId, long itemId) throws ValidationException {
+    private boolean isPastBooker(long authorId, long itemId) {
+        LocalDateTime now = LocalDateTime.now();
         if (itemRepository.findByItemIdWithComments(itemId).isEmpty()) {
             throw new ValidationException("This item does not have this booking");
         }
         List<Booking> bookings = bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(authorId,
-                LocalDateTime.now());
+                now);
         for (Booking b : bookings) {
             if (b.getBooker().getId() == authorId) {
                 return true;
             }
         }
-        bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(authorId, LocalDateTime.now(),
-                LocalDateTime.now());
+        bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(authorId, now, now);
         for (Booking b : bookings) {
             if (b.getBooker().getId() == authorId) {
                 return true;

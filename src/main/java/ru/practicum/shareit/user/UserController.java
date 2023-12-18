@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.NotFoundException;
+import ru.practicum.shareit.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.ValidationGroups;
 import ru.practicum.shareit.user.service.UserService;
@@ -23,8 +23,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public User create(@Validated(ValidationGroups.Create.class) @RequestBody UserDto userDto)
-            throws ValidationException, EmailDuplicationException {
+    public User create(@Validated(ValidationGroups.Create.class) @RequestBody UserDto userDto) {
         User user = userService.save(userDto);
         log.info("User created: {}", user);
         return user;
@@ -33,7 +32,7 @@ public class UserController {
     @PatchMapping("/{userId}")
     public User update(@Validated(ValidationGroups.Update.class) @RequestBody UserDto userDto,
                        @PathVariable long userId)
-            throws NotFoundException, ValidationException, EmailDuplicationException {
+            throws NotFoundException {
         User user = userService.update(userDto, userId);
         log.info("User updated: {}", user);
         return user;

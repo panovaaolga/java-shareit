@@ -10,8 +10,6 @@ import ru.practicum.shareit.item.dto.CommentDtoOutput;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithDates;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.InsufficientPermissionException;
-import ru.practicum.shareit.user.ValidationException;
 
 import java.util.List;
 
@@ -27,8 +25,7 @@ public class ItemController {
 
     @PostMapping
     public ItemDto createItem(@RequestHeader("X-Sharer-User-Id") long userId,
-                           @Validated(ValidationGroups.Create.class) @RequestBody ItemDto itemDto)
-            throws NotFoundException {
+                           @Validated(ValidationGroups.Create.class) @RequestBody ItemDto itemDto) {
         ItemDto itemDtoNew = itemService.save(itemDto, userId);
         log.info("Item created: {}", itemDtoNew);
         return itemDtoNew;
@@ -37,24 +34,26 @@ public class ItemController {
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") long userId,
                            @PathVariable long itemId,
-                           @Validated(ValidationGroups.Update.class) @RequestBody ItemDto itemDto)
-            throws NotFoundException, InsufficientPermissionException {
+                           @Validated(ValidationGroups.Update.class) @RequestBody ItemDto itemDto) {
         return itemService.update(userId, itemId, itemDto);
     }
 
     @GetMapping
-    public List<ItemDtoWithDates> getAllItemsOfUser(@RequestHeader("X-Sharer-User-Id") long userId) {
-        return itemService.getAllItemsByUser(userId);
+    public List<ItemDtoWithDates> getAllItemsOfUser(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                    @RequestParam(defaultValue = "0") int from,
+                                                    @RequestParam(defaultValue = "10") int size) {
+        return itemService.getAllItemsByUser(userId, from, size);
     }
 
     @GetMapping("/{itemId}")
     public ItemDtoWithDates getItemById(@RequestHeader("X-Sharer-User-Id") long userId,
-                                        @PathVariable long itemId) throws NotFoundException {
+                                        @PathVariable long itemId) {
         return itemService.getItem(itemId, userId);
     }
 
     @GetMapping("/search")
     public List<ItemDto> getSearchedItems(@RequestParam String text) {
+
         return itemService.getSearchedItems(text);
     }
 
@@ -66,8 +65,7 @@ public class ItemController {
     @PostMapping("{itemId}/comment")
     public CommentDtoOutput addComment(@RequestHeader("X-Sharer-User-Id") long authorId,
                                        @PathVariable long itemId,
-                                       @Validated @RequestBody CommentDtoInput commentDtoInput)
-            throws NotFoundException, ValidationException {
+                                       @Validated @RequestBody CommentDtoInput commentDtoInput) {
         return itemService.addComment(commentDtoInput, authorId, itemId);
     }
 }

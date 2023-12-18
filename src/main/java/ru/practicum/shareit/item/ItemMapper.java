@@ -5,6 +5,7 @@ import ru.practicum.shareit.item.dto.CommentDtoOutput;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithDates;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
 import java.util.ArrayList;
@@ -18,6 +19,9 @@ public class ItemMapper {
         itemDto.setName(item.getName());
         itemDto.setDescription(item.getDescription());
         itemDto.setAvailable(item.getAvailable());
+        if (item.getRequest() != null) {
+            itemDto.setRequestId(item.getRequest().getId());
+        }
         return itemDto;
     }
 
@@ -31,31 +35,22 @@ public class ItemMapper {
         return itemDtoList;
     }
 
+    public static Item mapToNewItem(ItemDto itemDto, User user, ItemRequest request) {
+        Item item = new Item();
+        item.setOwner(user);
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
+        item.setAvailable(itemDto.getAvailable());
+        item.setRequest(request);
+        return item;
+    }
+
     public static Item mapToNewItem(ItemDto itemDto, User user) {
         Item item = new Item();
         item.setOwner(user);
         item.setName(itemDto.getName());
         item.setDescription(itemDto.getDescription());
         item.setAvailable(itemDto.getAvailable());
-        return item;
-    }
-
-    public static Item mapToExistingItem(ItemDto itemDto, long itemId) {
-        Item item = new Item();
-        item.setId(itemId);
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
-        item.setAvailable(itemDto.getAvailable());
-        return item;
-    }
-
-    public static Item mapToItem(ItemDto itemDto, long itemId, User user) {
-        Item item = new Item();
-        item.setId(itemId);
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
-        item.setAvailable(itemDto.getAvailable());
-        item.setOwner(user);
         return item;
     }
 
