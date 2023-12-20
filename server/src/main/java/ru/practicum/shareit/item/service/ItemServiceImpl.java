@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
@@ -110,7 +111,8 @@ public class ItemServiceImpl implements ItemService {
         if (from < 0 || size <= 0) {
             throw new ValidationException("Params with requested values are not allowed");
         }
-        Page<Item> items = itemRepository.findAllByOwnerId(userId, PageRequest.of(from / size, size));
+        Page<Item> items = itemRepository
+                .findAllByOwnerId(userId, PageRequest.of(from / size, size, Sort.by("id")));
         BookingDtoOutput lastBooking = null;
         BookingDtoOutput nextBooking = null;
         if (items.isEmpty()) {
