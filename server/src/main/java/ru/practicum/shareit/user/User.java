@@ -3,7 +3,6 @@ package ru.practicum.shareit.user;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 
 /**
  * TODO Sprint add-controllers.
@@ -23,6 +22,5 @@ public class User {
     @Column(name = "user_name")
     private String name;
     @Column(unique = true)
-    @NotBlank
     private String email;
 }
