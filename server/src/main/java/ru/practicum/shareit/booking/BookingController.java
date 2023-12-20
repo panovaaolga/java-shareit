@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -20,7 +19,7 @@ public class BookingController {
 
     @PostMapping
     public Booking create(@RequestHeader("X-Sharer-User-Id") long bookerId,
-                                   @Validated @RequestBody BookingDto bookingDto) {
+                          @RequestBody BookingDto bookingDto) {
         return bookingService.createBooking(bookingDto, bookerId);
     }
 
