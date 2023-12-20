@@ -1,4 +1,4 @@
-version: '24.0.7'
+version: '2.23.3'
 services:
   gateway:
     build: gateway
